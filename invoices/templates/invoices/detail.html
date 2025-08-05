@@ -1,0 +1,4 @@
+<h2>Invoice Results</h2>
+<p><strong>Amount Due:</strong> ${{ invoice.amount_due }}</p>
+<p><a href="{{ invoice.uploaded_pdf.url }}">Download Original PDF</a></p>
+<pre>{{ invoice.extracted_json|json_script:"extractedJson" }}</pre>

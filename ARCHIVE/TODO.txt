@@ -1,0 +1,34 @@
+1. Update group membership to show group name not just id
+2. Check in azure if we want to ONLY show app groups. 
+3. Start checking not just user name but also groups. 
+4. Once all grouping is done - create centralized folders for static images and other files. 
+5. FIgure out a folder structure for PDFs for each app and make them exempt from fit igore
+6. FIgure out how to push to production - ytiup another environment. 
+
+
+INVOICE APPLICATION:
+1. Pages:
+a. Add INVOICE
+b. NEW - Recurring CC option
+c. NEW - Reimbursemnt TOOL. 
+d. NEW - no REJECTION
+b. Process INVOICE - w PDF view
+c. Processing list view for each type of transac
+
+
+Processing permissions : 
+What if we had a file that had for each program the people that had approval permissions. 
+1. 
+
+
+PDF TOOLSET
+1. Add stamp Pages
+2. Replace stamp page. 
+3. Delete stamp page 
+4. Redesign stamp with azure AD creds - 
+
+
+
+Security enhancements - 
+1. Can force a dup prompt during submit - probably a bad idea. 
+2. Check how often windows login is needed?  can we make app re-login once a day 

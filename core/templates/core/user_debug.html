@@ -1,0 +1,27 @@
+{% block content %}
+<div class="container mt-5">
+    <h2>Azure AD OIDC Debug</h2>
+    <p><strong>Username:</strong> {{ user.username }}</p>
+    <p><strong>Full name:</strong> {{ user.get_full_name }}</p>
+    <p><strong>Email:</strong> {{ user.email }}</p>
+
+    <h3>Azure AD Groups</h3>
+    {% if group_names %}
+        <ul>
+        {% for group in group_names %}
+            <li>{{ group }}</li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>No groups found.</p>
+    {% endif %}
+
+    <h3>OIDC Claims</h3>
+    <pre>{{ claims|safe }}</pre>
+
+    {% if id_token %}
+        <h3>Raw ID Token</h3>
+        <textarea rows="6" style="width:100%" readonly>{{ id_token }}</textarea>
+        <p>Paste this token into <a href="https://jwt.ms" target="_blank">jwt.ms</a> to decode it.</p>
+    {% endif %}
+{% endblock %}

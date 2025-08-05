@@ -1,0 +1,42 @@
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file: .env
+    depends_on:
+      - db
+    volumes:
+      - /var/www/SW_LOB_FILES:/app/media:rw
+    expose:
+      - "8000"
+    restart: unless-stopped
+    command: >
+      sh -c "
+      python manage.py collectstatic --noinput &&
+      gunicorn base_app.wsgi:application --bind 0.0.0.0:8000
+      "
+
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: stopwaste
+      POSTGRES_PASSWORD: BlinkusGaladrigal
+      POSTGRES_DB: stopwasteapps
+    volumes:
+      - /var/www/SW_LOB_DB:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:1.25-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - web
+    volumes:
+      - ./app/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./app/nginx/certs:/etc/nginx/certs:ro
+      - /var/www/SW_LOB_FILES:/app/media:ro
+      - ./staticfiles:/app/staticfiles:ro

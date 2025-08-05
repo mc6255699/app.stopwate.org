@@ -1,0 +1,25 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    env_file:
+      - .env
+    volumes:
+      - .:/app                         # Live mount project code
+      - ./TEMP-MEDIA:/app/media:rw     # Dev media folder
+    ports:
+      - "8000:8000"
+    depends_on: []                     # Skip db dependency in dev (using SQLite)
+    command: >
+      sh -c "
+        python manage.py migrate &&
+        python manage.py runserver 0.0.0.0:8000
+      "
+
+  db:
+    image: busybox
+    command: sleep infinity
+
+  nginx:
+    entrypoint: ["echo", "nginx disabled in dev"]

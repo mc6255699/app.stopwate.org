@@ -1,0 +1,42 @@
+{% extends "ccbot/base_ccbot.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2>Submitted Credit Card Requests</h2>
+  <table id="requests-table" class="table table-bordered table-striped">
+    <thead>
+      <tr>
+        <th>Timestamp</th>
+        <th>Requested By</th>
+        <th>Vendor</th>
+        <th>Description</th>
+        <th>Amount</th>
+        <th>Card</th>
+        <th>Payment Code</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in requests %}
+      <tr>
+        <td>{{ r.timestamp }}</td>
+        <td>{{ r.requested_by }}</td>
+        <td>{{ r.vendor }}</td>
+        <td>{{ r.description }}</td>
+        <td>${{ r.amount }}</td>
+        <td>{{ r.credit_card_name.cc_name }}</td>
+        <td>{{ r.payment_code }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  $(document).ready(function () {
+    $('#requests-table').DataTable();
+  });
+</script>
+{% endblock %}

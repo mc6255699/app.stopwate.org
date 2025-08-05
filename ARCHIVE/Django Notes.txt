@@ -1,0 +1,54 @@
+Notes:
+
+DOCKER:
+
+1. Start/stop webserver
+START CONTAINER 
+docker-compose up 
+STOP CONTAINER 
+docker-compose down
+
+
+
+
+
+
+DJANGO STRUCTURE: 
+Django is pieced into "modules" called apps. 
+this makes it easy for django to have a lot of apps that do different things but could potentially share librarues.  Perfect for sw app. 
+
+There is a root folder 
+ROOT
+
+a "base app" this is creted by default and this app stores a lot of the installationwide settings. 
+
+app sub folders 
+	- these house all the code/logic and views for a specifi cmodule. In some cases the default app 
+	will :link to these.: 
+	
+	
+DJANGO FILES> 
+-settings.py - housed in base app. Lists all apps, and has some other db connect details 
+-urls.py - housed in base app, and also can link to urls.py which live in their respective app dirs. each individual app/module has their own so that their app links are largely self contained. 
+- views.py - houses the python code that manages what to display on screen - Acts like a controller of sorts.  Each module has their own 
+- templates folder - has a subfolder with the module name., all html views list inhere. 
+
+
+
+
+DJANGO:
+1. Add a new page
+a. Create html page - inside app/books/templates/books
+b. Create a view in views.py that routes a python request to an html page
+c. Create a url in urls.py that routes an HTML request to a python view funciton 
+main url.py-> (app) url.py -> views.py -> displaypage.html
+
+
+CREATING AN APP :
+1. List app in settings.py for apps. 
+2. update url.py to include a link to the app specific url.pyu 
+
+DJANGO ADMIN
+1. Django admin is a module that makes it easy to grant yo uback end access
+to your apps and db - so it makes things like user management, db back end access easy. 
+2. It knows your structure and gives you an easy back end 

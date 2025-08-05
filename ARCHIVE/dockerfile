@@ -1,0 +1,43 @@
+# syntax=docker/dockerfile:1
+FROM python:3.11-slim
+
+# ---- environment / metadata ----
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+# ---- system dependencies ----
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends curl unzip ca-certificates gcc libpq-dev && \
+    rm -rf /var/lib/apt/lists/*
+
+# ---- 1Password CLI (optional) ----
+RUN curl -fsSL https://cache.agilebits.com/dist/1P/op2/pkg/v2.29.0/op_linux_amd64_v2.29.0.zip -o op.zip && \
+    unzip op.zip -d op-cli && \
+    mv op-cli/op /usr/local/bin/op && \
+    chmod +x /usr/local/bin/op && \
+    rm -rf op.zip op-cli
+
+# verify; optional
+RUN op --version
+
+# ---- app code and working directory ----
+WORKDIR /app/app
+
+COPY requirements.txt /app/app/
+RUN pip install --upgrade pip setuptools wheel
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . /app/
+
+# ---- collect static ----
+# Will run in entrypoint script or docker-compose CMD instead
+# RUN python manage.py collectstatic --noinput
+
+# ---- entrypoint ----
+COPY entrypoint.sh /app/app/
+RUN chmod +x entrypoint.sh
+
+# ---- exposed port for NGINX proxy ----
+EXPOSE 8000
+
+CMD ["./entrypoint.sh"]

@@ -1,0 +1,18 @@
+{% extends "core/base_root.html" %} {% block navbar_class %}bg-light{%endblock %}
+ {% block app_nav %}
+<ul class="navbar-nav">
+  <li class="nav-item">
+    <a class="nav-link text-dark" href="{% url 'invoices:upload_invoice' %}">
+      Upload Invoice
+    </a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link text-dark" href="{% url 'invoices:search_invoice' %}">
+      Search Invoices
+    </a>
+  </li>
+</ul>
+{% endblock %}
+{% block content %} 
+  {% block invoices_content %}{% endblock %} 
+{%endblock %}

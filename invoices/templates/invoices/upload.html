@@ -1,0 +1,60 @@
+{% extends "invoices/base.html" %}
+{% load widget_tweaks %}
+
+{% load static %}
+
+{% block invoices_content %}
+<div class="container mt-4">
+  <div class="card shadow-sm">
+    <div class="card-header bg-success text-white">
+      <h4 class="mb-0">Upload Vendor Invoice</h4>
+    </div>
+    <div class="card-body">
+      <form method="post" enctype="multipart/form-data" id="invoice-upload-form">
+        {% csrf_token %}
+
+        <div class="mb-3">
+          <label for="id_code" class="form-label">Invoice Code</label>
+          {{ form.code|add_class:"form-control" }}
+        </div>
+
+        <div class="mb-3">
+          <label for="id_note" class="form-label">Note</label>
+          {{ form.note|add_class:"form-control" }}
+        </div>
+
+        <div class="mb-3">
+          <label for="id_uploaded_pdf" class="form-label">Upload PDF</label>
+          {{ form.uploaded_pdf|add_class:"form-control" }}
+        </div>
+
+        <div class="d-grid">
+          <button type="submit" class="btn btn-success">
+            Scan with Textract
+          </button>
+        </div>
+      </form>
+
+      <div id="loading-indicator" class="text-center mt-4" style="display:none;">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p class="mt-2">Analyzing PDF with Textract...</p>
+      </div>
+    </div>
+  </div>
+  {% if uploaded_pdf_url %}
+  <h4 class="mt-4">Preview Stamped PDF:</h4>
+  <!-- <iframe src="{{ uploaded_pdf_url }}" width="100%" height="800px" style="border: none;"></iframe> -->
+
+  <!-- <iframe src="/media/invoices/stamped/804_stamped.pdf" width="100%" height="800px" style="border: none;"></iframe> -->
+
+   <embed src="{{ uploaded_pdf_url }}" type="application/pdf" width="100%" height="800px" /> 
+{% endif %}
+
+</div>
+
+<script>
+document.getElementById('invoice-upload-form').addEventListener('submit', function () {
+  document.getElementById('loading-indicator').style.display = 'block';
+});
+</script>
+{% endblock %}

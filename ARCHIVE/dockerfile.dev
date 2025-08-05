@@ -1,0 +1,38 @@
+# syntax=docker/dockerfile:1
+
+FROM python:3.11-slim
+
+# ---- environment ----
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+# ---- working directory ----
+WORKDIR /app/app
+
+# ---- system dependencies ----
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    unzip \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# ---- optional: 1Password CLI ----
+RUN curl -fsSL https://cache.agilebits.com/dist/1P/op2/pkg/v2.29.0/op_linux_amd64_v2.29.0.zip -o op.zip && \
+    unzip op.zip -d op-cli && \
+    mv op-cli/op /usr/local/bin/op && \
+    chmod +x /usr/local/bin/op && \
+    rm -rf op.zip op-cli
+
+# ---- python dependencies ----
+COPY requirements.txt /app/app/
+RUN pip install --upgrade pip setuptools wheel
+RUN pip install --no-cache-dir -r requirements.txt
+
+# ---- copy full project ----
+COPY . /app/
+
+# ---- expose Django dev port ----
+EXPOSE 8000
+
+# ---- run dev server ----
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]

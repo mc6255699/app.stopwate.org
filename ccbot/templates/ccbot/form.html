@@ -1,0 +1,44 @@
+{% extends "ccbot/base_ccbot.html" %}
+
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container mt-5">
+  <h2 class="mb-4">Request a Credit Card</h2>
+
+  {% if error %}
+    <div class="alert alert-danger">{{ error }}</div>
+  {% endif %}
+
+  <form method="post" id="request-form">
+    {% csrf_token %}
+    {{ form|crispy }}
+
+    <button type="submit" class="btn btn-primary mt-3" id="submit-btn">
+      Submit
+    </button>
+  </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const form = document.getElementById("request-form");
+  const submitBtn = document.getElementById("submit-btn");
+
+  form.addEventListener("submit", function() {
+    // Prevent double submission if user clicks again quickly
+    if (submitBtn.disabled) return;
+
+    submitBtn.disabled = true;
+
+    // Replace content with spinner + text
+    submitBtn.innerHTML = `
+      <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+      Processing...
+    `;
+  });
+});
+</script>
+{% endblock %}

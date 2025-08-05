@@ -1,0 +1,59 @@
+{% extends "ccbot/base_ccbot.html" %}
+
+{% block content %}
+<div class="container mt-5">
+
+  <!-- 📋 Request Information Section -->
+  <div class="card mb-4">
+    <div class="card-header bg-secondary text-white">
+      Request Information
+    </div>
+    <div class="card-body small text-dark">
+      <div class="row mb-2">
+        <div class="col-sm-4"><strong>Name:</strong></div>
+        <div class="col-sm-8">{{ user_full_name }}</div>
+      </div>
+      <div class="row mb-2">
+        <div class="col-sm-4"><strong>Email:</strong></div>
+        <div class="col-sm-8">{{ user_email }}</div>
+      </div>
+      <div class="row mb-2">
+        <div class="col-sm-4"><strong>Amount:</strong></div>
+        <div class="col-sm-8">{{ amount }}</div>
+      </div>
+      <div class="row mb-2">
+        <div class="col-sm-4"><strong>Vendor:</strong></div>
+        <div class="col-sm-8">{{ vendor }}</div>
+      </div>
+      <div class="row mb-2">
+        <div class="col-sm-4"><strong>Description:</strong></div>
+        <div class="col-sm-8">{{ description }}</div>
+      </div>
+      <div class="row">
+        <div class="col-sm-4"><strong>Credit Card:</strong></div>
+        <div class="col-sm-8">{{ cc_recipient }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🔐 Secure Link Section -->
+  <div class="card border-warning bg-light mb-4">
+    <div class="card-body">
+      <h5 class="card-title text-warning">Secure Credit Card Link</h5>
+      <p class="card-text">
+        <a href="{{ share_link }}" class="fw-bold text-decoration-none text-primary">
+          {{ share_link }}
+        </a>
+      </p>
+      <p class="text-muted small">
+        (This link can only be used once and will expire in 24 hours.)
+      </p>
+    </div>
+  </div>
+
+  <p>Please remember to submit your credit card receipt in the AP portal — this is an important step in helping to keep credit card access automated.</p>
+
+  <a href="{% url 'core:hub' %}" class="btn btn-primary mt-4">Return to Hub</a>
+
+</div>
+{% endblock %}

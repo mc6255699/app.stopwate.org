@@ -1,0 +1,27 @@
+FROM python:3.11-slim
+
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
+WORKDIR /app
+
+# Remove if 1password is an issue 
+RUN apt-get update && apt-get install -y \
+    curl unzip ca-certificates && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Download and install the 1Password CLI manually
+RUN curl -sS https://cache.agilebits.com/dist/1P/op2/pkg/v2.29.0/op_linux_amd64_v2.29.0.zip -o op.zip && \
+    unzip op.zip -d op-cli && \
+    mv op-cli/op /usr/local/bin/op && \
+    chmod +x /usr/local/bin/op && \
+    rm -rf op.zip op-cli
+
+# Verify install
+RUN op --version
+
+
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+
+COPY . .
