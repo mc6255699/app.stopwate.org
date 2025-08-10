@@ -1,12 +1,13 @@
 from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.paginator import Paginator
+from django.db.models import Prefetch, Q, Count
+from django.contrib import messages
 from .models import *
 from .forms import *
 
-
-from django.core.paginator import Paginator
-from django.db.models import Prefetch
 
 
 # Create your views here.
@@ -71,4 +72,67 @@ class ContactUpdateView(UpdateView):
 class ContactDeleteView(DeleteView):
     model = Contact
     template_name = 'contacts/contact_confirm_delete.html'  # create this template
+    success_url = reverse_lazy('contacts:list')
+
+
+class ContactListListView(LoginRequiredMixin, ListView):
+    model = ContactList
+    template_name = "contacts/contactlist_list.html"
+    context_object_name = "lists"
+    paginate_by = 20
+
+    def get_queryset(self):
+        qs = (
+            ContactList.objects
+            .select_related("owner")
+            .annotate(member_count=Count("contacts", distinct=True))
+            .order_by("name")
+        )
+        q = self.request.GET.get("q", "").strip()
+        active = self.request.GET.get("active")
+        if q:
+            qs = qs.filter(
+                Q(name__icontains=q) |
+                Q(description__icontains=q) |
+                Q(owner__username__icontains=q)
+            )
+        if active in {"true", "false"}:
+            qs = qs.filter(active=(active == "true"))
+        return qs
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["q"] = self.request.GET.get("q", "")
+        ctx["active"] = self.request.GET.get("active", "")
+        return ctx
+
+
+class ContactListCreateView(LoginRequiredMixin, CreateView):
+    model = ContactList
+    form_class = ContactListForm
+    template_name = "contacts/contactlist_create.html"
+    success_url = reverse_lazy("contacts:contactlist_list")
+
+    def form_valid(self, form):
+        # Set owner on create
+        obj = form.save(commit=False)
+        if not obj.owner:
+            obj.owner = self.request.user
+        obj.save()
+        form.save_m2m()
+        messages.success(self.request, "Contact list created.")
+        return super().form_valid(form)
+
+class ContactListUpdateView(LoginRequiredMixin, UpdateView):
+    model = ContactList
+    form_class = ContactListForm
+    template_name = "contacts/contactlist_create.html"
+    success_url = reverse_lazy("contacts:contactlist_list")
+
+    def form_valid(self, form):
+        messages.success(self.request, "Contact list updated.")
+        return super().form_valid(form)
+    model = ContactList
+    form_class = ContactForm
+    template_name = 'contacts/contactlist_update.html'  # reuse create template
     success_url = reverse_lazy('contacts:list')

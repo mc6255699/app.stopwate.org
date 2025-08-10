@@ -11,9 +11,15 @@
     >
   </li>
   <li class="nav-item">
-    <a class="nav-link text-white" href="{% url 'contacts:list' %}"
-      >Contact Lists - Coming soon </a
+    <a class="nav-link text-white" href="{% url 'contacts:contactlist_list' %}"
+      >CL - ALL </a
     >
   </li>
+    <li class="nav-item">
+    <a class="nav-link text-white" href="{% url 'contacts:contactlist_create' %}"
+      >CL - ADD</a
+    >
+  </li>
+
 </ul>
 {% endblock %}

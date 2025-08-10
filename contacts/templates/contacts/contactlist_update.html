@@ -1,0 +1,19 @@
+{% extends "contacts/base_contacts.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% block extra_head %}
+  <style>
+    .table-rounded { border-radius: 1rem; overflow: hidden; }
+    .card, .form-control, .form-select { border-radius: .75rem; }
+    /* Hide Bootstrap Table’s built-in toolbar search; we use our own Name field */
+    .fixed-table-toolbar .search { display: none !important; }
+  </style>
+
+{% endblock %}
+{% block content %}
+
+  <h1 class="mb-3">Contact List Update Page</h1>
+
+{% endblock %}
+
+

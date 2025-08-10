@@ -1,0 +1,99 @@
+{# templates/contacts/contactlist_list.html #}
+{% extends "contacts/base_contacts.html" %}
+
+{% block content %}
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">Contact Lists</h2>
+    <a href="{% url 'contacts:contactlist_create' %}" class="btn btn-primary">
+      <i class="fa fa-plus me-1"></i> New List
+    </a>
+  </div>
+
+  <form method="get" class="row g-2 mb-3">
+    <div class="col-md-6">
+      <input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Search by name, description, or owner…">
+    </div>
+    <div class="col-md-3">
+      <select name="active" class="form-select">
+        <option value="">All statuses</option>
+        <option value="true" {% if active == "true" %}selected{% endif %}>Active</option>
+        <option value="false" {% if active == "false" %}selected{% endif %}>Inactive</option>
+      </select>
+    </div>
+    <div class="col-md-3 d-flex gap-2">
+      <button class="btn btn-outline-secondary" type="submit">Filter</button>
+      <a href="{% url 'contacts:contactlist_list' %}" class="btn btn-outline-secondary">Reset</a>
+    </div>
+  </form>
+
+  <div class="table-responsive">
+    <table class="table table-hover align-middle">
+      <thead class="table-light">
+        <tr>
+          <th>Name</th>
+          <th>Description</th>
+          <th>Owner</th>
+          <th>Members</th>
+          <th>Status</th>
+          <th style="width: 120px;">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in lists %}
+          <tr>
+            <td class="fw-semibold">{{ item.name }}</td>
+            <td class="text-muted">{{ item.description|default:"—" }}</td>
+            <td>{{ item.owner|default:"—" }}</td>
+            <td>
+              <span class="badge bg-secondary">{{ item.member_count }}</span>
+            </td>
+            <td>
+              {% if item.active %}
+                <span class="badge bg-success">Active</span>
+              {% else %}
+                <span class="badge bg-secondary">Inactive</span>
+              {% endif %}
+            </td>
+            <td>
+              <a href="{% url 'contacts:contactlist_update' item.pk %}" class="btn btn-sm btn-outline-primary">
+                <i class="fa fa-pen"></i> Edit
+              </a>
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="6" class="text-center text-muted py-4">No contact lists found.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if is_paginated %}
+    <nav aria-label="pagination">
+      <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+          <li class="page-item">
+            <a class="page-link" href="?q={{ q }}&active={{ active }}&page={{ page_obj.previous_page_number }}">Previous</a>
+          </li>
+        {% else %}
+          <li class="page-item disabled"><span class="page-link">Previous</span></li>
+        {% endif %}
+
+        <li class="page-item disabled">
+          <span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+        </li>
+
+        {% if page_obj.has_next %}
+          <li class="page-item">
+            <a class="page-link" href="?q={{ q }}&active={{ active }}&page={{ page_obj.next_page_number }}">Next</a>
+            </li>
+        {% else %}
+          <li class="page-item disabled"><span class="page-link">Next</span></li>
+        {% endif %}
+      </ul>
+    </nav>
+  {% endif %}
+</div>
+{% endblock %}

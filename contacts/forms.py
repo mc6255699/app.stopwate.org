@@ -1,10 +1,12 @@
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Submit, Row, Column, Div, Field, Layout, HTML
+
+from crispy_forms.layout import Layout, Row, Column, Fieldset, Submit
+
 from crispy_forms.bootstrap import  FormActions, FieldWithButtons, StrictButton
 
 from django import forms
-from .models import Contact
-from .models import Organization
+from .models import *
+
 
 class ContactForm(forms.ModelForm):
     class Meta:
@@ -79,3 +81,56 @@ class ContactFilterForm(forms.Form):
                 css_class='col-md-4 d-flex align-items-center'
             ),
         )
+
+
+class ContactListForm(forms.ModelForm):
+    class Meta:
+        model = ContactList
+        fields = ["name", "description", "active", "contacts", "sublists"]
+        widgets = {
+            "description": forms.Textarea(attrs={"rows": 4}),
+            "contacts": forms.SelectMultiple(attrs={"class": "form-select", "size": 8}),
+            "sublists": forms.SelectMultiple(attrs={"class": "form-select", "size": 6}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Order pickers in a friendly way (adjust if your Contact fields differ)
+        self.fields["contacts"].queryset = Contact.objects.all().order_by("last_name", "first_name")
+        self.fields["sublists"].queryset = ContactList.objects.all().order_by("name")
+
+        # Exclude self from sublists on edit to avoid self-reference
+        if self.instance and self.instance.pk:
+            self.fields["sublists"].queryset = self.fields["sublists"].queryset.exclude(pk=self.instance.pk)
+
+        self.fields["contacts"].help_text = "Hold Ctrl/Cmd to select multiple."
+        self.fields["sublists"].help_text = "Optional: include other contact lists."
+
+        self.helper = FormHelper()
+        self.helper.form_method = "post"
+        self.helper.form_tag = True
+        self.helper.layout = Layout(
+            Fieldset(
+                "Contact List",
+                Row(
+                    Column("name", css_class="col-md-6"),
+                    Column("active", css_class="col-md-2 d-flex align-items-center"),
+                    Column("description", css_class="col-md-12 mt-2"),
+                ),
+            ),
+            Fieldset(
+                "Members",
+                Row(
+                    Column("contacts", css_class="col-md-7"),
+                    Column("sublists", css_class="col-md-5"),
+                ),
+            ),
+            Submit("submit", "Save", css_class="btn btn-primary"),
+        )
+
+    def clean_sublists(self):
+        subs = self.cleaned_data.get("sublists")
+        if self.instance and self.instance.pk and subs.filter(pk=self.instance.pk).exists():
+            raise forms.ValidationError("A list cannot include itself as a sublist.")
+        return subs
