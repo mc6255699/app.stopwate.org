@@ -13,28 +13,7 @@
 {% endblock %}
 
 {% block content %}
-<style>
-  .icon-button {
-    background-color: #c4c4c4;
-    border-radius: 0.5rem;
-    padding: 0.5rem;
-    display: inline-block;
-    transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-  }
 
-  .icon-button:hover {
-    background-color: #b0b0b0;
-    transform: scale(1.05);
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-    cursor: pointer;
-  }
-
-  .request-row {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-  }
-</style>
 
 <h1 class="mb-4"><i class="fas fa-th-large"></i> Stopwaste Internal Apps</h1>
 
@@ -44,36 +23,51 @@
       <a href="{% url 'ccbot:request_card' %}" class="icon-button">
         <img src="{% static 'cc.png' %}" alt="Credit Card" style="width: 40px; height: auto;">
       </a>
-      <div class="fw-semibold fs-6 text-dark">Request a Credit Card</div>
+      <div class="fw-semibold fs-6 text-dark ms-2">  Request a Credit Card</div>
     </div>
   </div>
 </div>
 
-<h2 class="mt-5 mb-3">Coming Soon</h2>
+<h3 class="mt-5 mb-4 text-muted">
+  <i class="fas fa-hourglass-half me-2"></i> Coming Soon
+</h3>
+
 <div class="row g-4">
+
+  <!-- Example inactive card -->
   <div class="col-md-3">
-    <div class="card bg-light text-muted text-center shadow opacity-50" aria-disabled="true" style="pointer-events: none;">
+    <div class="card border-secondary border-2 text-center shadow-sm opacity-50" 
+         style="pointer-events: none;">
       <div class="card-body">
-        <i class="fas fa-address-book fa-2x mb-2"></i>
-        <h5>Contacts</h5>
+        <i class="fas fa-address-book fa-2x mb-2 text-secondary"></i>
+        <h5 class="mb-1">Contacts</h5>
+        <span class="badge bg-secondary">Coming Soon</span>
       </div>
     </div>
   </div>
+
   <div class="col-md-3">
-    <div class="card bg-light text-muted text-center shadow opacity-50" aria-disabled="true" style="pointer-events: none;">
+    <div class="card border-secondary border-2 text-center shadow-sm opacity-50"
+         style="pointer-events: none;">
       <div class="card-body">
-        <i class="fas fa-file-contract fa-2x mb-2"></i>
-        <h5>Contracts</h5>
+        <i class="fas fa-file-contract fa-2x mb-2 text-secondary"></i>
+        <h5 class="mb-1">Contracts</h5>
+        <span class="badge bg-secondary">Coming Soon</span>
       </div>
     </div>
   </div>
+
   <div class="col-md-3">
-    <div class="card bg-light text-muted text-center shadow opacity-50" aria-disabled="true" style="pointer-events: none;">
+    <div class="card border-secondary border-2 text-center shadow-sm opacity-50"
+         style="pointer-events: none;">
       <div class="card-body">
-        <i class="fas fa-file-invoice fa-2x mb-2"></i>
-        <h5>Invoices</h5>
+        <i class="fas fa-file-invoice fa-2x mb-2 text-secondary"></i>
+        <h5 class="mb-1">Invoices</h5>
+        <span class="badge bg-secondary">Coming Soon</span>
       </div>
     </div>
   </div>
+
 </div>
+
 {% endblock %}

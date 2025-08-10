@@ -1,0 +1,19 @@
+.icon-button {
+  background-color: #c4c4c4;
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+  display: inline-block;
+  transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.icon-button:hover {
+  background-color: #b0b0b0;
+  transform: scale(1.05);
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+}
+
+.request-row {
+  display: flex;
+  align-items: center;
+  g

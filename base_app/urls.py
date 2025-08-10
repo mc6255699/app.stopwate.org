@@ -22,6 +22,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('invoices/', include('invoices.urls')),
     path('ccbot/', include('ccbot.urls')),
+    path('contacts/', include('contacts.urls', namespace='contacts')),
+
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

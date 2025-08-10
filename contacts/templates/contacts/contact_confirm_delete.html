@@ -1,0 +1,16 @@
+{% extends "contacts/base_contacts.html" %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2 class="text-danger">Delete Contact</h2>
+  <hr>
+
+  <p>Are you sure you want to delete <strong>{{ object.first_name }} {{ object.last_name }}</strong>?</p>
+
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Yes, delete</button>
+    <a href="{% url 'contacts:list' %}" class="btn btn-secondary">Cancel</a>
+  </form>
+</div>
+{% endblock %}

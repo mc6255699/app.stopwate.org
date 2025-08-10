@@ -5,10 +5,10 @@ import os
 
 load_dotenv()
 
+print("DEBUG raw value:", os.getenv("DEBUG"))
 
 
-
-DEBUG = os.getenv("DEBUG", "false").lower() == "true"
+DEBUG =  os.getenv("DEBUG")
 ENVIRONMENT = os.getenv("ENVIRONMENT", "dev")  # "prod" or "dev"
 
 
@@ -76,6 +76,7 @@ INSTALLED_APPS = [
     #'books',
     #'mozilla_django_oidc',
     'core',
+    'contacts',
     'invoices',
     'crispy_forms',
     'crispy_bootstrap5',
@@ -128,26 +129,52 @@ TEMPLATES = [
 WSGI_APPLICATION = 'base_app.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('POSTGRES_DB', 'stopwasteapps'),
-        'USER': os.getenv('POSTGRES_USER', 'stopwaste'),
-        'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'BlinkusGaladrigal'),
-        'HOST': '127.0.0.1',
-        'PORT': '5432',
+if DEBUG:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.getenv('POSTGRES_DB', 'stopwasteapps'),
+            'USER': os.getenv('POSTGRES_USER', 'stopwaste'),
+            'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'BlinkusGaladrigal'),
+            'HOST': '127.0.0.1',
+            'PORT': '5432',
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#
+#
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': os.getenv('POSTGRES_DB', 'stopwasteapps'),
+#         'USER': os.getenv('POSTGRES_USER', 'stopwaste'),
+#         'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'BlinkusGaladrigal'),
+#         'HOST': '127.0.0.1',
+#         'PORT': '5432',
+#     }
+# }
 
 
 # Password validation
@@ -177,9 +204,6 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-
-
 
 
 STATIC_URL = "/static/"
