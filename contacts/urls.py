@@ -17,9 +17,11 @@ urlpatterns = [
     path("lists/new/", ContactListCreateView.as_view(), name="contactlist_create"),
     path("lists/<int:pk>/edit/", ContactListUpdateView.as_view(), name="contactlist_update"),
 
-    # path('list_list', ContactListListView.as_view(), name='list_list'),  # list all contact lists
-    # path('list_add/', ContactListCreateView.as_view(), name='list_add'),  # the create form
-    # path("<int:pk>/list_edit/", ContactListUpdateView.as_view(), name="list_update"),
-    # path("<int:pk>/list_create/", ContactListCreateView.as_view(), name="list_delete"),
+
+    path('lists/search/', views.search_contact_lists, name='list_search'),
+    path('<int:pk>/lists/add/', views.add_contact_to_list, name='contact_list_add'),
+    path('<int:pk>/lists/remove/', views.remove_contact_from_list, name='contact_list_remove'),
+
 ]
+
 

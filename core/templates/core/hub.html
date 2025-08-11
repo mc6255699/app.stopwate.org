@@ -7,67 +7,67 @@
 {% block app_nav %}
 <ul class="navbar-nav">
   <li class="nav-item">
-    <a class="nav-link text-white" href="#">Portal Hub</a>
+    <span class="navbar-text text-white fw-bold">
+      Stopwaste Internal Apps
+    </span>
   </li>
 </ul>
 {% endblock %}
 
 {% block content %}
 
-
-<h1 class="mb-4"><i class="fas fa-th-large"></i> Stopwaste Internal Apps</h1>
-
-<div class="row g-3 mb-5">
-  <div class="col-md-4">
-    <div class="request-row">
-      <a href="{% url 'ccbot:request_card' %}" class="icon-button">
-        <img src="{% static 'cc.png' %}" alt="Credit Card" style="width: 40px; height: auto;">
-      </a>
-      <div class="fw-semibold fs-6 text-dark ms-2">  Request a Credit Card</div>
-    </div>
-  </div>
-</div>
-
-<h3 class="mt-5 mb-4 text-muted">
-  <i class="fas fa-hourglass-half me-2"></i> Coming Soon
-</h3>
-
-<div class="row g-4">
-
-  <!-- Example inactive card -->
+<div class="row g-4 mb-5 mt-3">
+  <!-- Credit Card Button -->
   <div class="col-md-3">
-    <div class="card border-secondary border-2 text-center shadow-sm opacity-50" 
-         style="pointer-events: none;">
-      <div class="card-body">
-        <i class="fas fa-address-book fa-2x mb-2 text-secondary"></i>
-        <h5 class="mb-1">Contacts</h5>
-        <span class="badge bg-secondary">Coming Soon</span>
+    <a href="{% url 'ccbot:request_card' %}" class="text-decoration-none">
+      <div class="card border-primary border-2 text-center shadow-sm">
+        <div class="card-body">
+          <i class="fas fa-credit-card fa-2x mb-2 text-primary"></i>
+          <h5 class="mb-1 text-primary">Request a Credit Card</h5>
+          <span class="badge bg-primary">Go</span>
+        </div>
       </div>
-    </div>
+    </a>
   </div>
 
+  <!-- Contacts Button -->
   <div class="col-md-3">
-    <div class="card border-secondary border-2 text-center shadow-sm opacity-50"
-         style="pointer-events: none;">
-      <div class="card-body">
-        <i class="fas fa-file-contract fa-2x mb-2 text-secondary"></i>
-        <h5 class="mb-1">Contracts</h5>
-        <span class="badge bg-secondary">Coming Soon</span>
+    <a href="/contacts" class="text-decoration-none">
+      <div class="card border-primary border-2 text-center shadow-sm">
+        <div class="card-body">
+          <i class="fas fa-address-book fa-2x mb-2 text-primary"></i>
+          <h5 class="mb-1 text-primary">Contacts</h5>
+          <span class="badge bg-primary">Go</span>
+        </div>
       </div>
-    </div>
+    </a>
   </div>
 
+  <!-- Contracts Button -->
   <div class="col-md-3">
-    <div class="card border-secondary border-2 text-center shadow-sm opacity-50"
-         style="pointer-events: none;">
-      <div class="card-body">
-        <i class="fas fa-file-invoice fa-2x mb-2 text-secondary"></i>
-        <h5 class="mb-1">Invoices</h5>
-        <span class="badge bg-secondary">Coming Soon</span>
+    <a href="#" class="text-decoration-none">
+      <div class="card border-secondary border-2 text-center shadow-sm">
+        <div class="card-body">
+          <i class="fas fa-file-contract fa-2x mb-2 text-secondary"></i>
+          <h5 class="mb-1 text-secondary">Contracts</h5>
+          <span class="badge bg-secondary">Coming Soon</span>
+        </div>
       </div>
-    </div>
+    </a>
   </div>
 
+  <!-- Invoices Button -->
+  <div class="col-md-3">
+    <a href="#" class="text-decoration-none">
+      <div class="card border-secondary border-2 text-center shadow-sm">
+        <div class="card-body">
+          <i class="fas fa-file-invoice fa-2x mb-2 text-secondary"></i>
+          <h5 class="mb-1 text-secondary">Invoices</h5>
+          <span class="badge bg-secondary">Coming Soon</span>
+        </div>
+      </div>
+    </a>
+  </div>
 </div>
 
 {% endblock %}

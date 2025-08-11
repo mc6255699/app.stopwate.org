@@ -1,0 +1,10 @@
+/* Rounded, carded tables with Bootstrap Table */
+.table-card { border-radius: 1rem; overflow: hidden; }
+.table-card .table { margin-bottom: 0; }
+.card-soft { border: 0; border-radius: 1rem; box-shadow: var(--bs-box-shadow-sm); }
+
+/* Optional: consistent rounded UI */
+.form-control, .form-select, .btn { border-radius: .75rem; }
+
+/* Hide Bootstrap Table’s built-in toolbar search if you add 'table-hide-toolbar' to wrapper */
+.table-hide-toolbar .fixed-table-toolbar .search { display: none !important; }

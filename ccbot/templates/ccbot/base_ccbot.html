@@ -1,15 +1,24 @@
-
 {% extends "core/base_root.html" %}
 
 {% block navbar_class %}bg-success{% endblock %}  {# Green navbar #}
 
 {% block app_nav %}
-  <ul class="navbar-nav">
-    <li class="nav-item">
-      <a class="nav-link" href="{% url 'ccbot:request_card' %}">Request a Card</a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link" href="{% url 'ccbot:cc_log' %}">View Submissions</a>
-    </li>
-  </ul>
+<ul class="navbar-nav mx-auto d-flex align-items-center">
+  <!-- Icon + Title with Dropdown -->
+  <li class="nav-item dropdown d-flex align-items-center me-3">
+    <i class="fas fa-credit-card fa-lg text-white me-2"></i>
+    <a class="nav-link dropdown-toggle text-white fw-bold" href="#" id="ccDropdown" role="button"
+       data-bs-toggle="dropdown" aria-expanded="false">
+      Credit Card Requests
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="ccDropdown">
+      <li>
+        <a class="dropdown-item" href="{% url 'ccbot:request_card' %}">Request a Card</a>
+      </li>
+      <li>
+        <a class="dropdown-item" href="{% url 'ccbot:cc_log' %}">View Submissions</a>
+      </li>
+    </ul>
+  </li>
+</ul>
 {% endblock %}

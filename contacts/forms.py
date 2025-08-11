@@ -1,6 +1,6 @@
 from crispy_forms.helper import FormHelper
 
-from crispy_forms.layout import Layout, Row, Column, Fieldset, Submit
+from crispy_forms.layout import Layout, Row, Column, Fieldset, Submit, Field
 
 from crispy_forms.bootstrap import  FormActions, FieldWithButtons, StrictButton
 
@@ -18,7 +18,8 @@ class ContactForm(forms.ModelForm):
             'phone_number',
             'email',
             'organization',
-            'owner'
+            'owner', 
+            'note'
         ]
         widgets = {
             'email': forms.EmailInput(attrs={
@@ -32,6 +33,7 @@ class ContactForm(forms.ModelForm):
             }),
             'first_name': forms.TextInput(attrs={'required': True}),
             'last_name': forms.TextInput(attrs={'required': True}),
+            'note': forms.Textarea(attrs={'rows': 4, 'placeholder': 'Additional notes about the contact'}),
         }
 
     def __init__(self, *args, **kwargs):
@@ -54,6 +56,9 @@ class ContactForm(forms.ModelForm):
             Row(
                 Column(Field('organization'), css_class='col-md-6 mb-3'),
                 Column(Field('owner'), css_class='col-md-6 mb-3'),
+            ),
+            Row(
+                Column(Field('note'), css_class='col-md-12 mb-3'),
             ),
             FormActions(
                 Submit('submit', 'Save Contact', css_class='btn btn-primary')

@@ -25,7 +25,7 @@ class Contact(models.Model):
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     job_title = models.CharField(max_length=100, blank=True)
-
+    note = models.TextField(blank=True)
     # Phone number with simple validation for digits, +, - and spaces
     phone_regex = RegexValidator(
         regex=r'^\+?1?\d{9,15}$',

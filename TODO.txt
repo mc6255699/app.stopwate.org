@@ -1,0 +1,45 @@
+CONTACT LIST
+1. Seach
+- name
+- description
+- ower
+
+2. create
+- contact search and add
+
+3. Delete or edit
+-contact search and add
+
+
+
+
+
+CONTACTS
+1. Search
+2. Create
+3. Delete/Edit
+4. Add to a list.
+
+
+
+
+Organizations:
+1. Create
+2. Edit/Delte
+
+
+MANAGEMENT FXNS:
+1. Audit deletions/changes.
+2. Add notes dields
+3. Allow for import by csv
+4. Allow for export or copy past for easy emails.
+
+
+
+Dashboard:
+
+Login
+
+Shows you YOUR lists by default
+
+Gives you a search .
