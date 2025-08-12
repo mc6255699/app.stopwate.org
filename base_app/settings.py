@@ -9,14 +9,13 @@ print("DEBUG raw value:", os.getenv("DEBUG"))
 
 
 #DEBUG =  os.getenv("DEBUG")
-DEBUG = False
+BASE_DIR = Path(__file__).resolve().parent.parent
 ENVIRONMENT = os.getenv("ENVIRONMENT", "dev")  # "prod" or "dev"
-DB_ENGINE = os.getenv("DB_ENGINE").lower()
-#APP_PROXY_CALLBACK = os.getenv("APP_PROXY_CALLBACK", "https://stopwastedjangoapp-stopwaste.msappproxy.net/oidc/callback/")
-#probably dont need these next 2 - will experiment wiht decomisison 
-#LOCAL_CALLBACK = os.getenv("LOCAL_CALLBACK", "http://localhost:8000/oidc/callback/")
-#INTERNAL_HOST = os.getenv("INTERNAL_HOST", "http://localhost:8000")
-#end dont need probably 
+#DB_ENGINE = os.getenv("DB_ENGINE").lower()
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+SECRET_KEY = 'django-insecure-g&=)-s8my*@7q83-wxe4nx3i(jjm9-#-85h%n9gf-a9(-tiplg'
+ALLOWED_HOSTS = ["*"]
+
 
 LOGIN_URL="django_auth_adfs:login"  
 LOGIN_REDIRECT_URL = '/hub/'
@@ -51,18 +50,6 @@ EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', EMAIL_HOST_USER)
 DJANGO_SETTINGS_MODULE = os.getenv('DJANGO_SETTINGS_MODULE')
 
-BASE_DIR = Path(__file__).resolve().parent.parent
-
-print("✅ DSM =", DJANGO_SETTINGS_MODULE)
-
-
-STATIC_ROOT = BASE_DIR / 'staticfiles'
-SECRET_KEY = 'django-insecure-g&=)-s8my*@7q83-wxe4nx3i(jjm9-#-85h%n9gf-a9(-tiplg'
-
-#ADDED 
-#ALLOWED_HOSTS = ["0.0.0.0", "127.0.0.1","10.1.3.66", "localhost","app.stopwaste.org",  "stopwastedjangoapp-stopwaste.msappproxy.net",]
-ALLOWED_HOSTS = ["*"]
-
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -73,8 +60,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.humanize',
     'django_auth_adfs',
-    #'books',
-    #'mozilla_django_oidc',
     'core',
     'contacts',
     'invoices',
@@ -95,7 +80,6 @@ AUTHENTICATION_BACKENDS = [
     #'core.oidc.AzureOIDCBackend',  # NOT USED ANYMORE during migration
 
  ]
-
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -149,30 +133,35 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
 
-DATABASES = {
-    'default': {
-    'ENGINE': 'django.db.backends.sqlite3',
-    'NAME': BASE_DIR / 'db.sqlite3',
+
+
+# =======================
+# Database config
+# =======================
+if os.getenv("POSTGRES_DB"):
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.getenv('POSTGRES_DB'),
+            'USER': os.getenv('POSTGRES_USER'),
+            'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
+            'HOST': os.getenv('POSTGRES_HOST', '127.0.0.1'),
+            'PORT': os.getenv('POSTGRES_PORT', '5432'),
         }
-}
-#
-# DATABASES = {
-#     'default': {
-#     'ENGINE': 'django.db.backends.postgresql',
-#     'NAME': os.getenv('POSTGRES_DB', 'stopwasteapps'),
-#     'USER': os.getenv('POSTGRES_USER', 'stopwaste'),
-#     'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'BlinkusGaladrigal'),
-#     'HOST': '127.0.0.1',
-#     'PORT': '5432',
-#     }
-# }
+    }
+    print(f"📦 Using **Postgres** DB: {DATABASES['default']['NAME']} at {DATABASES['default']['HOST']}:{DATABASES['default']['PORT']}")
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
+    print(f"📦 Using **SQLite** DB at {DATABASES['default']['NAME']}")
+
+
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
@@ -186,21 +175,17 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
-#STATICFILES_DIRS = [
-#    BASE_DIR / 'core' / 'static',
-#]
 
-#STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-X_FRAME_OPTIONS = 'SAMEORIGIN'
+
 
 # Trust X-Forwarded headers from Azure App Proxy or NGINX
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 USE_X_FORWARDED_HOST = True
-
+X_FRAME_OPTIONS = 'SAMEORIGIN'
 
 
 #ADDED
@@ -208,9 +193,6 @@ CSRF_TRUSTED_ORIGINS = [
     "https://app.stopwaste.org",
     "https://stopwastedjangoapp-stopwaste.msappproxy.net",
 ]
-
-
-import os
 
 AUTH_ADFS = {
     "AUDIENCE": "6150bd55-28c1-4616-9da7-f68b411ebbae",
