@@ -119,17 +119,13 @@ def cc_log(request):
     })
 
 def _filter_cc_requests(request):
-    """
-    Filters: q (vendor/description/requested_by), date range, min/max amount, card
-    """
     qs = CCRequest.objects.select_related("credit_card_name").order_by("-timestamp")
-
-    q = request.GET.get("q", "").strip()
-    date_from = request.GET.get("date_from", "").strip()
-    date_to = request.GET.get("date_to", "").strip()
-    min_amt = request.GET.get("min_amount", "").strip()
-    max_amt = request.GET.get("max_amount", "").strip()
-    card = request.GET.get("card", "").strip()
+    q = (request.GET.get("q") or "").strip()
+    date_from = (request.GET.get("date_from") or "").strip()
+    date_to = (request.GET.get("date_to") or "").strip()
+    min_amt = (request.GET.get("min_amount") or "").strip()
+    max_amt = (request.GET.get("max_amount") or "").strip()
+    card = (request.GET.get("card") or "").strip()
 
     if q:
         qs = qs.filter(
@@ -141,43 +137,37 @@ def _filter_cc_requests(request):
         qs = qs.filter(timestamp__date__gte=date_from)
     if date_to:
         qs = qs.filter(timestamp__date__lte=date_to)
-
     if min_amt:
-        try:
-            qs = qs.filter(amount__gte=float(min_amt))
-        except ValueError:
-            pass
+        try: qs = qs.filter(amount__gte=float(min_amt))
+        except ValueError: pass
     if max_amt:
-        try:
-            qs = qs.filter(amount__lte=float(max_amt))
-        except ValueError:
-            pass
-
+        try: qs = qs.filter(amount__lte=float(max_amt))
+        except ValueError: pass
     if card:
         qs = qs.filter(credit_card_name__cc_name__iexact=card)
 
     return qs
-
-
 def cc_requests_export_csv(request):
     rows = _filter_cc_requests(request)
 
+    # Include today's local date in the filename
+    today_str = timezone.localdate().strftime("%Y-%m-%d")
     response = HttpResponse(content_type="text/csv")
-    response["Content-Disposition"] = 'attachment; filename="cc_requests.csv"'
+    response["Content-Disposition"] = f'attachment; filename="cc_requests_{today_str}.csv"'
 
     writer = csv.writer(response)
-    writer.writerow([
-        "Timestamp", "Requested By", "Vendor", "Description", "Amount", "Card"
-    ])
+    # No Payment Code column
+    writer.writerow(["Date (MM/DD/YY)", "Requested By", "Vendor", "Description", "Amount", "Card"])
 
     for r in rows:
-        writer.writerow([
-            timezone.localtime(r.timestamp).strftime("%Y-%m-%d %H:%M"),
-            r.requested_by,
-            r.vendor,
-            r.description,
-            f"{r.amount:.2f}" if r.amount is not None else "",
-            getattr(r.credit_card_name, "cc_name", ""),
-        ])
+        local_date = timezone.localtime(r.timestamp).strftime("%m/%d/%y") if r.timestamp else ""
+        requested_by = str(r.requested_by) if r.requested_by is not None else ""
+        vendor = r.vendor or ""
+        description = r.description or ""
+        # USD formatting with comma separators + 2 decimals
+        amount_str = f"${r.amount:,.2f}" if r.amount is not None else ""
+        card_name = getattr(r.credit_card_name, "cc_name", "") or ""
+
+        writer.writerow([local_date, requested_by, vendor, description, amount_str, card_name])
 
     return response

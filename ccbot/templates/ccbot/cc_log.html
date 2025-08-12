@@ -1,8 +1,9 @@
 {% extends "ccbot/base_ccbot.html" %}
 {% load static %}
+{% load tz %}
+{% load humanize %}
 
 {% block extra_head %}
-  {# Bootstrap Table CSS (only if not already in your base) #}
   <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.22.5/dist/bootstrap-table.min.css">
   <style>
     .table-rounded { border-radius: 1rem; overflow: hidden; }
@@ -90,7 +91,7 @@
       >
         <thead class="table-header-green">
           <tr>
-            <th data-sortable="true">Timestamp</th>
+            <th data-sortable="true">Date</th>
             <th data-sortable="true">Requested By</th>
             <th data-sortable="true">Vendor</th>
             <th data-sortable="true">Description</th>
@@ -101,16 +102,20 @@
         <tbody>
           {% for r in requests %}
           <tr>
-            <td data-order="{{ r.timestamp|date:'c' }}">{{ r.timestamp|date:"Y-m-d H:i" }}</td>
+            <td data-order="{{ r.timestamp|localtime|date:'Y-m-d' }}">
+              {{ r.timestamp|localtime|date:"m/d/y" }}
+            </td>
             <td>{{ r.requested_by }}</td>
             <td>{{ r.vendor }}</td>
             <td>{{ r.description }}</td>
-            <td data-order="{{ r.amount|default:0 }}">{{ r.amount|floatformat:2 }}</td>
+            <td data-order="{{ r.amount|default:0 }}">
+              ${{ r.amount|default:0|floatformat:2|intcomma }}
+            </td>
             <td>{{ r.credit_card_name.cc_name }}</td>
           </tr>
           {% empty %}
           <tr>
-            <td colspan="7" class="text-center text-muted py-4">No results.</td>
+            <td colspan="6" class="text-center text-muted py-4">No results.</td>
           </tr>
           {% endfor %}
         </tbody>
