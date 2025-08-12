@@ -8,11 +8,10 @@ load_dotenv()
 print("DEBUG raw value:", os.getenv("DEBUG"))
 
 
-DEBUG =  os.getenv("DEBUG")
+#DEBUG =  os.getenv("DEBUG")
+DEBUG = False
 ENVIRONMENT = os.getenv("ENVIRONMENT", "dev")  # "prod" or "dev"
-
-
-
+DB_ENGINE = os.getenv("DB_ENGINE").lower()
 #APP_PROXY_CALLBACK = os.getenv("APP_PROXY_CALLBACK", "https://stopwastedjangoapp-stopwaste.msappproxy.net/oidc/callback/")
 #probably dont need these next 2 - will experiment wiht decomisison 
 #LOCAL_CALLBACK = os.getenv("LOCAL_CALLBACK", "http://localhost:8000/oidc/callback/")
@@ -50,11 +49,11 @@ EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'false').lower() == 'true'
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', EMAIL_HOST_USER)
-
+DJANGO_SETTINGS_MODULE = os.getenv('DJANGO_SETTINGS_MODULE')
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-print("✅ BASE_DIR =", BASE_DIR)
+print("✅ DSM =", DJANGO_SETTINGS_MODULE)
 
 
 STATIC_ROOT = BASE_DIR / 'staticfiles'
@@ -129,53 +128,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'base_app.wsgi.application'
 
 
-if DEBUG:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
-    }
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.getenv('POSTGRES_DB', 'stopwasteapps'),
-            'USER': os.getenv('POSTGRES_USER', 'stopwaste'),
-            'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'BlinkusGaladrigal'),
-            'HOST': '127.0.0.1',
-            'PORT': '5432',
-    }
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#
-#
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': os.getenv('POSTGRES_DB', 'stopwasteapps'),
-#         'USER': os.getenv('POSTGRES_USER', 'stopwaste'),
-#         'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'BlinkusGaladrigal'),
-#         'HOST': '127.0.0.1',
-#         'PORT': '5432',
-#     }
-# }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -195,6 +147,30 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
+
+DATABASES = {
+    'default': {
+    'ENGINE': 'django.db.backends.sqlite3',
+    'NAME': BASE_DIR / 'db.sqlite3',
+        }
+}
+#
+# DATABASES = {
+#     'default': {
+#     'ENGINE': 'django.db.backends.postgresql',
+#     'NAME': os.getenv('POSTGRES_DB', 'stopwasteapps'),
+#     'USER': os.getenv('POSTGRES_USER', 'stopwaste'),
+#     'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'BlinkusGaladrigal'),
+#     'HOST': '127.0.0.1',
+#     'PORT': '5432',
+#     }
+# }
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/

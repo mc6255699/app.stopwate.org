@@ -1,42 +1,126 @@
 {% extends "ccbot/base_ccbot.html" %}
 {% load static %}
 
+{% block extra_head %}
+  {# Bootstrap Table CSS (only if not already in your base) #}
+  <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.22.5/dist/bootstrap-table.min.css">
+  <style>
+    .table-rounded { border-radius: 1rem; overflow: hidden; }
+    .card, .form-control, .form-select, .btn { border-radius: .75rem; }
+    .card.shadow-sm { box-shadow: 0 .125rem .25rem rgba(0,0,0,.075)!important; }
+    .filter-label { font-weight: 600; }
+
+    /* Light green header like Contacts */
+    .table-header-green {
+      background-color: #d4edda !important;
+      color: #155724 !important;
+    }
+  </style>
+{% endblock %}
+
 {% block content %}
 <div class="container mt-4">
-  <h2>Submitted Credit Card Requests</h2>
-  <table id="requests-table" class="table table-bordered table-striped">
-    <thead>
-      <tr>
-        <th>Timestamp</th>
-        <th>Requested By</th>
-        <th>Vendor</th>
-        <th>Description</th>
-        <th>Amount</th>
-        <th>Card</th>
-        <th>Payment Code</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for r in requests %}
-      <tr>
-        <td>{{ r.timestamp }}</td>
-        <td>{{ r.requested_by }}</td>
-        <td>{{ r.vendor }}</td>
-        <td>{{ r.description }}</td>
-        <td>${{ r.amount }}</td>
-        <td>{{ r.credit_card_name.cc_name }}</td>
-        <td>{{ r.payment_code }}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">Submitted Credit Card Requests</h2>
+    <a class="btn btn-success"
+       href="{% url 'ccbot:cc_requests_export_csv' %}{% if request.GET %}?{{ request.GET.urlencode }}{% endif %}">
+      <i class="fas fa-file-csv me-1"></i> Export CSV
+    </a>
+  </div>
+
+  <!-- Filters -->
+  <div class="card mb-3 shadow-sm border-0" style="border-radius: 1rem;">
+    <div class="card-body">
+      <form method="get" class="row g-3 align-items-end">
+        <div class="col-12 col-md-3">
+          <label class="form-label filter-label" for="q">Search</label>
+          <input type="text" id="q" name="q" value="{{ request.GET.q }}" class="form-control"
+                 placeholder="Vendor, description, requester">
+        </div>
+        <div class="col-6 col-md-2">
+          <label class="form-label filter-label" for="date_from">From</label>
+          <input type="date" id="date_from" name="date_from" value="{{ request.GET.date_from }}" class="form-control">
+        </div>
+        <div class="col-6 col-md-2">
+          <label class="form-label filter-label" for="date_to">To</label>
+          <input type="date" id="date_to" name="date_to" value="{{ request.GET.date_to }}" class="form-control">
+        </div>
+        <div class="col-6 col-md-2">
+          <label class="form-label filter-label" for="min_amount">Min $</label>
+          <input type="number" step="0.01" id="min_amount" name="min_amount"
+                 value="{{ request.GET.min_amount }}" class="form-control">
+        </div>
+        <div class="col-6 col-md-2">
+          <label class="form-label filter-label" for="max_amount">Max $</label>
+          <input type="number" step="0.01" id="max_amount" name="max_amount"
+                 value="{{ request.GET.max_amount }}" class="form-control">
+        </div>
+        <div class="col-12 col-md-3">
+          <label class="form-label filter-label" for="card">Card</label>
+          <select id="card" name="card" class="form-select">
+            <option value="">All</option>
+            {% for name in card_names %}
+              <option value="{{ name }}" {% if request.GET.card == name %}selected{% endif %}>{{ name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-12 col-md-9">
+          <button type="submit" class="btn btn-primary me-2">Apply</button>
+          <a href="{% url 'ccbot:cc_log' %}" class="btn btn-outline-secondary">Reset</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="card shadow-sm border-0" style="border-radius: 1rem;">
+    <div class="card-body p-0">
+      <table
+        id="requests-table"
+        class="table table-striped table-hover table-bordered mb-0 table-rounded"
+        data-toggle="table"
+        data-pagination="true"
+        data-page-size="10"
+        data-page-list="[10, 25, 50, 100, All]"
+        data-search="false"
+        data-sort-class="table-active"
+        data-maintain-meta-data="true"
+        data-mobile-responsive="true"
+      >
+        <thead class="table-header-green">
+          <tr>
+            <th data-sortable="true">Timestamp</th>
+            <th data-sortable="true">Requested By</th>
+            <th data-sortable="true">Vendor</th>
+            <th data-sortable="true">Description</th>
+            <th data-sortable="true" data-align="right">Amount</th>
+            <th data-sortable="true">Card</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in requests %}
+          <tr>
+            <td data-order="{{ r.timestamp|date:'c' }}">{{ r.timestamp|date:"Y-m-d H:i" }}</td>
+            <td>{{ r.requested_by }}</td>
+            <td>{{ r.vendor }}</td>
+            <td>{{ r.description }}</td>
+            <td data-order="{{ r.amount|default:0 }}">{{ r.amount|floatformat:2 }}</td>
+            <td>{{ r.credit_card_name.cc_name }}</td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="7" class="text-center text-muted py-4">No results.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
-<script>
-  $(document).ready(function () {
-    $('#requests-table').DataTable();
-  });
-</script>
+  <script src="https://unpkg.com/bootstrap-table@1.22.5/dist/bootstrap-table.min.js"></script>
+  <script src="https://unpkg.com/bootstrap-table@1.22.5/dist/extensions/mobile/bootstrap-table-mobile.min.js"></script>
 {% endblock %}

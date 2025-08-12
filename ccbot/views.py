@@ -6,6 +6,12 @@ from django.shortcuts import render
 from .forms import CCRequestForm  # ✅ your new ModelForm
 from dotenv import load_dotenv
 from .models import CCRequest
+from django.http import HttpResponse
+from django.db.models import Q
+from django.utils import timezone
+import csv
+
+
 
 load_dotenv()  # Load OP_SERVICE_ACCOUNT_TOKEN, CC_VAULT_ID
 
@@ -100,5 +106,78 @@ from .models import CCRequest
 
 @login_required
 def cc_log(request):
-    requests = CCRequest.objects.select_related('credit_card_name').order_by('-timestamp')
-    return render(request, 'ccbot/cc_log.html', {'requests': requests})
+    requests_qs = _filter_cc_requests(request)
+    card_names = (
+        CCRequest.objects.select_related("credit_card_name")
+        .values_list("credit_card_name__cc_name", flat=True)
+        .distinct()
+        .order_by("credit_card_name__cc_name")
+    )
+    return render(request, "ccbot/cc_log.html", {
+        "requests": requests_qs,
+        "card_names": card_names,
+    })
+
+def _filter_cc_requests(request):
+    """
+    Filters: q (vendor/description/requested_by), date range, min/max amount, card
+    """
+    qs = CCRequest.objects.select_related("credit_card_name").order_by("-timestamp")
+
+    q = request.GET.get("q", "").strip()
+    date_from = request.GET.get("date_from", "").strip()
+    date_to = request.GET.get("date_to", "").strip()
+    min_amt = request.GET.get("min_amount", "").strip()
+    max_amt = request.GET.get("max_amount", "").strip()
+    card = request.GET.get("card", "").strip()
+
+    if q:
+        qs = qs.filter(
+            Q(vendor__icontains=q) |
+            Q(description__icontains=q) |
+            Q(requested_by__icontains=q)
+        )
+    if date_from:
+        qs = qs.filter(timestamp__date__gte=date_from)
+    if date_to:
+        qs = qs.filter(timestamp__date__lte=date_to)
+
+    if min_amt:
+        try:
+            qs = qs.filter(amount__gte=float(min_amt))
+        except ValueError:
+            pass
+    if max_amt:
+        try:
+            qs = qs.filter(amount__lte=float(max_amt))
+        except ValueError:
+            pass
+
+    if card:
+        qs = qs.filter(credit_card_name__cc_name__iexact=card)
+
+    return qs
+
+
+def cc_requests_export_csv(request):
+    rows = _filter_cc_requests(request)
+
+    response = HttpResponse(content_type="text/csv")
+    response["Content-Disposition"] = 'attachment; filename="cc_requests.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow([
+        "Timestamp", "Requested By", "Vendor", "Description", "Amount", "Card"
+    ])
+
+    for r in rows:
+        writer.writerow([
+            timezone.localtime(r.timestamp).strftime("%Y-%m-%d %H:%M"),
+            r.requested_by,
+            r.vendor,
+            r.description,
+            f"{r.amount:.2f}" if r.amount is not None else "",
+            getattr(r.credit_card_name, "cc_name", ""),
+        ])
+
+    return response

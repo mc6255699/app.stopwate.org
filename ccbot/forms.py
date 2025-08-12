@@ -31,7 +31,7 @@ class CCRequestForm(forms.ModelForm):
 
     class Meta:
         model = CCRequest
-        fields = ['description', 'vendor', 'amount', 'credit_card_name', 'payment_code']
+        fields = ['description', 'vendor', 'amount', 'credit_card_name']
         widgets = {
             'description': forms.Textarea(attrs={
                 'class': 'form-control',
@@ -46,10 +46,10 @@ class CCRequestForm(forms.ModelForm):
                 'class': 'form-control',
                 'placeholder': 'e.g., 123.45'
             }),
-            'payment_code': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': ''
-            }),
+            # 'payment_code': forms.TextInput(attrs={
+            #     'class': 'form-control',
+            #     'placeholder': ''
+            # }),
         }
         labels = {
             'payment_code': 'Allocation Code (optional)',
