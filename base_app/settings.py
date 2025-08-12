@@ -86,7 +86,8 @@ INSTALLED_APPS = [
 CRISPY_ALLOWED_TEMPLATE_PACKS = ["bootstrap5"]
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 
-
+TIME_ZONE = 'America/Los_Angeles'
+USE_TZ = True
 AUTHENTICATION_BACKENDS = [
     'django_auth_adfs.backend.AdfsAuthCodeBackend',
     'django.contrib.auth.backends.ModelBackend', # path to your custom backend
