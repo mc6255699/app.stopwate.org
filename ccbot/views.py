@@ -147,6 +147,7 @@ def _filter_cc_requests(request):
         qs = qs.filter(credit_card_name__cc_name__iexact=card)
 
     return qs
+
 def cc_requests_export_csv(request):
     rows = _filter_cc_requests(request)
 

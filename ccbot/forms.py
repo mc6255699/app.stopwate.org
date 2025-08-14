@@ -18,7 +18,7 @@ CC_CHOICES_TUPLES = [(v, k) for k, v in CC_CHOICES.items()]
 
 class CCRequestForm(forms.ModelForm):
     credit_card_name = forms.ModelChoiceField(
-        queryset=CCName.objects.all(),
+        queryset=CCName.objects.filter(active=True),
         widget=forms.Select(attrs={'class': 'form-select'}),
         label="Name on Card"
     )
