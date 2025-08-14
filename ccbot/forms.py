@@ -16,22 +16,16 @@ CC_CHOICES_TUPLES = [(v, k) for k, v in CC_CHOICES.items()]
 
 
 
-
-
-
-
-
-
 class CCRequestForm(forms.ModelForm):
     credit_card_name = forms.ModelChoiceField(
         queryset=CCName.objects.all(),
         widget=forms.Select(attrs={'class': 'form-select'}),
-        label="Credit Card Owner"
+        label="Name on Card"
     )
 
     class Meta:
         model = CCRequest
-        fields = ['description', 'vendor', 'amount', 'credit_card_name']
+        fields = ['description', 'vendor', 'amount', 'credit_card_name', 'it_approval']
         widgets = {
             'description': forms.Textarea(attrs={
                 'class': 'form-control',
@@ -53,5 +47,10 @@ class CCRequestForm(forms.ModelForm):
         }
         labels = {
             'payment_code': 'Allocation Code (optional)',
+            'vendor': 'Merchant Name',
+            'it_approval': '   Yes I have written IT approval'
+         }
+        help_texts = {
+            'it_approval': '💡 IT approval is required for all software/equipment purchases. If you do not have written approval, please contact Mike before any purchase.'
         }
           

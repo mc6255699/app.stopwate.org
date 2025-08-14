@@ -18,7 +18,7 @@ urlpatterns = [
 
     path('', include('core.urls')),  # and hub will be at /
     path('auth/', include("django_auth_adfs.urls")),
-    path('core/', include("core.urls", namespace="core")),
+    #path('core/', include("core.urls", namespace="core")),
     path('admin/', admin.site.urls),
     path('invoices/', include('invoices.urls')),
     path('ccbot/', include('ccbot.urls')),

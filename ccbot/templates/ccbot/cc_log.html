@@ -97,6 +97,8 @@
             <th data-sortable="true">Description</th>
             <th data-sortable="true" data-align="right">Amount</th>
             <th data-sortable="true">Card</th>
+            <th data-sortable="true">IT_Apprvl</th>
+
           </tr>
         </thead>
         <tbody>
@@ -112,6 +114,8 @@
               ${{ r.amount|default:0|floatformat:2|intcomma }}
             </td>
             <td>{{ r.credit_card_name.cc_name }}</td>
+            <td>{{ r.it_approval }}</td>
+
           </tr>
           {% empty %}
           <tr>
