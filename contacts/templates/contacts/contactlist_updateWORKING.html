@@ -9,8 +9,85 @@
     .remove-btn { margin-left: 1rem; color: #b00; cursor: pointer; }
   </style>
 {% endblock %}
+
 {% block content %}
-    {%crispy form%}
+  <div class="container mt-4">
+    <h1>Edit Contact List: {{ object.name }}</h1>
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+
+    <form method="post" id="contactlist-form" class="mb-4">
+      {% csrf_token %}
+      {{ form|crispy }}
+      <button type="submit" class="btn btn-success">Save Changes</button>
+      <a href="{% url 'contacts:contactlist_list' %}" class="btn btn-secondary">Back</a>
+    </form>
+
+    <hr>
+
+    <div class="row">
+      <div class="col-md-6">
+        <h3>Contacts in this List</h3>
+        <ul id="contacts-list" class="list-group mb-2">
+          {% for c in object.contacts.all %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              {{ c.get_full_name|default:c.email }}
+              <button class="btn btn-sm btn-outline-danger remove-contact-btn"
+                      data-contact="{{ c.id }}">
+                &times;
+              </button>
+            </li>
+          {% empty %}
+            <li class="list-group-item text-muted">No contacts in this list.</li>
+          {% endfor %}
+        </ul>
+
+        <form id="add-contact-form" class="d-flex mb-3" autocomplete="off">
+          <select class="form-select me-2" name="contact_id" required>
+            <option value="">Add contact...</option>
+            {% for c in contacts %}
+              {% if c not in object.contacts.all %}
+                <option value="{{ c.id }}">{{ c.get_full_name|default:c.email }}</option>
+              {% endif %}
+            {% endfor %}
+          </select>
+          <button type="submit" class="btn btn-primary">Add</button>
+        </form>
+      </div>
+
+      <div class="col-md-6">
+        <h3>Sublists</h3>
+        <ul id="sublists-list" class="list-group mb-2">
+          {% for l in object.sublists.all %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              {{ l.name }}
+              <button class="btn btn-sm btn-outline-danger remove-sublist-btn"
+                      data-sublist="{{ l.id }}">
+                &times;
+              </button>
+            </li>
+          {% empty %}
+            <li class="list-group-item text-muted">No sublists in this list.</li>
+          {% endfor %}
+        </ul>
+
+        <form id="add-sublist-form" class="d-flex mb-3" autocomplete="off">
+          <select class="form-select me-2" name="sublist_id" required>
+            <option value="">Add sublist...</option>
+            {% for l in available_sublists %}
+              {% if l not in object.sublists.all and l.id != object.id %}
+                <option value="{{ l.id }}">{{ l.name }}</option>
+              {% endif %}
+            {% endfor %}
+          </select>
+          <button type="submit" class="btn btn-primary">Add</button>
+        </form>
+      </div>
+    </div>
+  </div>
 {% endblock %}
 
 {% block extra_js %}
@@ -35,7 +112,6 @@
 
   // Add contact
   document.getElementById('add-contact-form').onsubmit = function(e) {
-    debugger;
     e.preventDefault();
     const select = this.querySelector('select[name="contact_id"]');
     const contactId = select.value;
@@ -52,8 +128,7 @@
 
   // Remove contact
   document.querySelectorAll('.remove-contact-btn').forEach(btn => {
-debugger;
-btn.onclick = function() {
+    btn.onclick = function() {
       const contactId = this.getAttribute('data-contact');
       fetch("{% url 'contacts:contact_list_remove' 0 %}".replace('/0/', '/' + contactId + '/'), {
         method: "POST",
@@ -67,8 +142,7 @@ btn.onclick = function() {
 
   // Add sublist
   document.getElementById('add-sublist-form').onsubmit = function(e) {
-
-        e.preventDefault();
+    e.preventDefault();
     const select = this.querySelector('select[name="sublist_id"]');
     const sublistId = select.value;
     if (!sublistId) return;

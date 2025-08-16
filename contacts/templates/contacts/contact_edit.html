@@ -1,34 +1,136 @@
 {% extends "contacts/base_contacts.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block extra_head %}
+  <style>
+    .add-section {
+      background: #f8f9fa;
+      border-radius: 0.75rem;
+      padding: 1.2rem;
+      margin-bottom: 2rem;
+    }
+  </style>
+{% endblock %}
 
 {% block content %}
 <div class="container mt-4">
-  <h2>{{ object.first_name }} {{ object.last_name }}</h2>
-  <hr>
+  <h1>Edit Contact: {{ object.get_full_name|default:object.email }}</h1>
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
 
-  <dl class="row">
-    <dt class="col-sm-3">Job Title</dt>
-    <dd class="col-sm-9">{{ object.job_title }}</dd>
+  <form method="post" class="mb-4">
+    {% csrf_token %}
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        {{ form.first_name|as_crispy_field }}
+      </div>
+      <div class="col-md-6 mb-3">
+        {{ form.last_name|as_crispy_field }}
+      </div>
+      <div class="col-md-6 mb-3">
+        {{ form.job_title|as_crispy_field }}
+      </div>
+      <div class="col-md-6 mb-3">
+        {{ form.phone_number|as_crispy_field }}
+      </div>
+      <div class="col-md-6 mb-3">
+        {{ form.email|as_crispy_field }}
+      </div>
+      <div class="col-md-6 mb-3">
+        {{ form.owner|as_crispy_field }}
+      </div>
+      <div class="col-12 mb-3">
+        {{ form.note|as_crispy_field }}
+      </div>
+    </div>
+    <button type="submit" class="btn btn-success mt-2">Save Changes</button>
+    <a href="{% url 'contacts:list' %}" class="btn btn-secondary mt-2">Back</a>
+  </form>
 
-    <dt class="col-sm-3">Phone Number</dt>
-    <dd class="col-sm-9">{{ object.phone_number }}</dd>
+  <!-- Add to Contact List Section -->
+  <div class="add-section">
+    <h3>Add to Contact List</h3>
+    <input type="text" id="list-search" class="form-control" placeholder="Type a contact list name...">
+    <div id="search-results" class="list-group mt-2"></div>
+  </div>
 
-    <dt class="col-sm-3">Email</dt>
-    <dd class="col-sm-9">{{ object.email }}</dd>
-
-    <dt class="col-sm-3">Organization</dt>
-    <dd class="col-sm-9">{{ object.organization }}</dd>
-
-    <dt class="col-sm-3">Note</dt>
-    <dd class="col-sm-9">{{ object.note|linebreaks }}</dd>
-
-    <dt class="col-sm-3">Owner</dt>
-    <dd class="col-sm-9">{{ object.owner }}</dd>
-  </dl>
-
-  <div class="mt-4">
-    <a href="{% url 'contacts:update' object.pk %}" class="btn btn-primary">Edit</a>
-    <a href="{% url 'contacts:delete' object.pk %}" class="btn btn-danger">Delete</a>
-    <a href="{% url 'contacts:list' %}" class="btn btn-secondary">Back to list</a>
+  <!-- List Membership Section -->
+  <div class="add-section">
+    <h3>List Membership</h3>
+    <ul id="contact-list-membership" class="list-group">
+      {% for contact_list in object.contact_lists.all %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          {{ contact_list.name }}
+          <form method="post"
+                action="{% url 'contacts:contact_list_remove' object.id %}"
+                style="display: inline;">
+            {% csrf_token %}
+            <input type="hidden" name="list_id" value="{{ contact_list.id }}">
+            <button class="btn btn-sm btn-outline-danger" type="submit">Remove</button>
+          </form>
+        </li>
+      {% empty %}
+        <li class="list-group-item text-muted">Not a member of any list.</li>
+      {% endfor %}
+    </ul>
   </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const searchInput = document.getElementById("list-search");
+    const resultsDiv = document.getElementById("search-results");
+    const contactId = "{{ object.id }}";
+    const csrfToken = "{{ csrf_token }}";
+
+    let timeout = null;
+
+    searchInput.addEventListener("keyup", function() {
+        clearTimeout(timeout);
+        console.log("Search input: " + this.value);
+        const query = this.value.trim();
+        if (!query) {
+            resultsDiv.innerHTML = "";
+            return;
+        }
+        timeout = setTimeout(() => {
+            fetch("{% url 'contacts:list_search' %}?q=" + encodeURIComponent(query))
+                .then(response => response.json())
+                .then(data => {
+                    resultsDiv.innerHTML = "";
+                    let alreadyMemberIds = [
+                        {% for contact_list in object.contact_lists.all %}
+                            {{ contact_list.id }},
+                        {% endfor %}
+                    ];
+                    (data.results || []).forEach(list => {
+                        if (alreadyMemberIds.includes(list.id)) return;
+                        let item = document.createElement("div");
+                        item.className = "list-group-item d-flex justify-content-between align-items-center";
+                        item.innerHTML = `
+                            <span>${list.name}</span>
+                            <form method="post" action="/contacts/${contactId}/lists/add/" style="display: inline;">
+                                <input type="hidden" name="csrfmiddlewaretoken" value="${csrfToken}">
+                                <input type="hidden" name="list_id" value="${list.id}">
+                                <button type="submit" class="btn btn-sm btn-success ms-3">Add</button>
+                            </form>
+                        `;
+                        resultsDiv.appendChild(item);
+                    });
+                    if (resultsDiv.innerHTML.trim() === "") {
+                        resultsDiv.innerHTML = "<div class='list-group-item text-muted'>No lists found.</div>";
+                    }
+                });
+        }, 300);
+    });
+
+    // No need for the click event handler anymore since we're using regular form submissions
+});
+</script>
 {% endblock %}

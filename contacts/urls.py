@@ -20,7 +20,14 @@ urlpatterns = [
 
     path('lists/search/', views.search_contact_lists, name='list_search'),
     path('<int:pk>/lists/add/', views.add_contact_to_list, name='contact_list_add'),
+    path('contacts/<int:pk>/lists/add/', views.add_contact_to_list, name='contact_list_add'),
+    path('contacts/<int:contact_id>/lists/add/', views.add_contact_to_list, name='contact_list_add_alt'),
     path('<int:pk>/lists/remove/', views.remove_contact_from_list, name='contact_list_remove'),
+    path('lists/<int:list_id>/add_sublist/', views.add_sublist_to_list, name='add_sublist_to_list'),
+    path('lists/<int:list_id>/remove_sublist/', views.remove_sublist_from_list, name='remove_sublist_from_list'),
+
+    # ajax functions
+    path('contacts/search/', views.search_contact_by_name, name='contact_search'),
 
 ]
 

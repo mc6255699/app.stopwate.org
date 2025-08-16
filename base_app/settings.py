@@ -5,10 +5,9 @@ import os
 
 load_dotenv()
 
-print("DEBUG raw value:", os.getenv("DEBUG"))
 
 
-#DEBUG =  os.getenv("DEBUG")
+DEBUG =True
 BASE_DIR = Path(__file__).resolve().parent.parent
 ENVIRONMENT = os.getenv("ENVIRONMENT", "dev")  # "prod" or "dev"
 #DB_ENGINE = os.getenv("DB_ENGINE").lower()

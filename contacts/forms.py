@@ -1,12 +1,8 @@
 from crispy_forms.helper import FormHelper
-
 from crispy_forms.layout import Layout, Row, Column, Fieldset, Submit, Field
-
 from crispy_forms.bootstrap import  FormActions, FieldWithButtons, StrictButton
-
 from django import forms
 from .models import *
-
 
 class ContactForm(forms.ModelForm):
     class Meta:
@@ -87,7 +83,6 @@ class ContactFilterForm(forms.Form):
             ),
         )
 
-
 class ContactListForm(forms.ModelForm):
     class Meta:
         model = ContactList
@@ -102,7 +97,12 @@ class ContactListForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
 
         # Order pickers in a friendly way (adjust if your Contact fields differ)
-        self.fields["contacts"].queryset = Contact.objects.all().order_by("last_name", "first_name")
+        # Use all contacts when creating a new list, but only show current contacts when editing
+        if self.instance and self.instance.pk:
+            self.fields["contacts"].queryset = self.instance.contacts.all().order_by("last_name", "first_name")
+        else:
+            self.fields["contacts"].queryset = Contact.objects.all().order_by("last_name", "first_name")
+
         self.fields["sublists"].queryset = ContactList.objects.all().order_by("name")
 
         # Exclude self from sublists on edit to avoid self-reference
