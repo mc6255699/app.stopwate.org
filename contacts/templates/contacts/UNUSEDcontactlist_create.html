@@ -262,6 +262,7 @@
       selectedContacts.add(contactId);
 
       // Add to grid
+      debugger;
       fetch(`/contacts/${contactId}/`)
         .then(response => response.json())
         .then(contact => {
