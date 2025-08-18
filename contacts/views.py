@@ -7,7 +7,7 @@ from django.db.models import Prefetch, Q, Count
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, HttpResponseBadRequest, HttpResponse
-from django.views.decorators.http import require_GET
+from django.views.decorators.http import require_GET,require_POST
 from .models import *
 from .forms import *
 # contacts/views.py
@@ -122,32 +122,27 @@ class ContactListListView(LoginRequiredMixin, ListView):
 class ContactListCreateView(LoginRequiredMixin, CreateView):
     model = ContactList
     form_class = ContactListForm
-    template_name = "contacts/contactlist_create.html"
+    template_name = "contacts/contactlist_edit.html"  # Or create.html if you wish
     success_url = reverse_lazy("contacts:contactlist_list")
 
     def form_valid(self, form):
-        # Set owner on create
-        obj = form.save(commit=False)
-        if not obj.owner:
-            obj.owner = self.request.user
-        obj.save()
-        form.save_m2m()
+        if not form.instance.owner_id:
+            form.instance.owner = self.request.user
         messages.success(self.request, "Contact list created.")
         return super().form_valid(form)
 
 class ContactListUpdateView(LoginRequiredMixin, UpdateView):
     model = ContactList
     form_class = ContactListForm
-    template_name = "contacts/contactlist_update.html"
+    template_name = "contacts/contactlist_edit.html"  # Or update.html
     success_url = reverse_lazy("contacts:contactlist_list")
 
     def form_valid(self, form):
         messages.success(self.request, "Contact list updated.")
         return super().form_valid(form)
 
+
     #-----------------------AJAX VIEWS-----------------------
-
-
 
 @login_required
 @require_GET
@@ -256,3 +251,27 @@ def remove_sublist_from_list(request, pk):
     sublist = get_object_or_404(ContactList, pk=sublist_id)
     mainlist.sublists.remove(sublist)
     return JsonResponse({"ok": True})
+
+
+#used to get contact data as json to return to the dynamic contact add function 
+def contact_detail_api(request, pk):
+    c = get_object_or_404(Contact, pk=pk)
+    return JsonResponse({
+        "id": c.id,
+        "first_name": c.first_name or "",
+        "last_name": c.last_name or "",
+        "job_title": c.job_title or "",
+        "organization": c.organization or "",
+        "email": c.email or "",
+        "phone_number": c.phone_number or "",
+    })
+
+
+@require_POST
+@login_required
+def contactlist_remove_contact(request, pk, contact_id):
+    cl = get_object_or_404(ContactList, pk=pk)
+    contact = get_object_or_404(Contact, pk=contact_id)
+    cl.contacts.remove(contact)
+    messages.success(request, f"Removed {contact.first_name} {contact.last_name} from “{cl.name}”.")
+    return redirect("contacts:contactlist_edit", pk=pk)

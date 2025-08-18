@@ -1,0 +1,486 @@
+{# templates/contacts/contactlist_create.html #}
+{% extends "contacts/base_contacts.html" %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">
+      {% if object %}Edit Contact List{% else %}New Contact List{% endif %}
+    </h2>
+    <a href="{% url 'contacts:contactlist_list' %}" class="btn btn-outline-secondary">Back to Lists</a>
+  </div>
+
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <form method="post" id="contactListForm" novalidate>
+        {% csrf_token %}
+
+        <!-- Basic Information -->
+        <div class="row mb-4">
+          <div class="col-md-6">
+            {{ form.name|as_crispy_field }}
+          </div>
+          <div class="col-md-2 d-flex align-items-center">
+            {{ form.active|as_crispy_field }}
+          </div>
+          <div class="col-md-12 mt-2">
+            {{ form.description|as_crispy_field }}
+          </div>
+        </div>
+
+        <!-- Hidden fields for form submission -->
+        <div style="display: none;">
+          {{ form.contacts }}
+          {{ form.sublists }}
+        </div>
+
+        <!-- Contacts Grid -->
+        <h4 class="mb-3">Contacts on this List</h4>
+        <div class="card mb-4">
+          <div class="card-header bg-light d-flex justify-content-between align-items-center">
+            <span>Contacts</span>
+            <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addContactModal">
+              <i class="fas fa-plus"></i> Add Contact
+            </button>
+          </div>
+          <div class="card-body">
+            <div class="row contacts-grid" id="contactsGrid">
+              {% if object and object.contacts.all %}
+                {% for contact in object.contacts.all %}
+                  <div class="col-md-4 mb-3 contact-item" data-contact-id="{{ contact.id }}">
+                    <div class="card h-100">
+                      <div class="card-body">
+                        <h5 class="card-title">{{ contact.first_name }} {{ contact.last_name }}</h5>
+                        {% if contact.job_title %}<p class="card-text text-muted mb-1">{{ contact.job_title }}</p>{% endif %}
+                        {% if contact.organization %}<p class="card-text text-muted mb-1">{{ contact.organization }}</p>{% endif %}
+                        {% if contact.email %}<p class="card-text mb-1"><i class="fas fa-envelope me-2"></i>{{ contact.email }}</p>{% endif %}
+                        {% if contact.phone_number %}<p class="card-text"><i class="fas fa-phone me-2"></i>{{ contact.phone_number }}</p>{% endif %}
+                      </div>
+                      <div class="card-footer bg-white">
+                        <button type="button" class="btn btn-sm btn-outline-danger remove-contact" data-contact-id="{{ contact.id }}">
+                          <i class="fas fa-times"></i> Remove
+                        </button>
+                        <a href="{% url 'contacts:detail' contact.id %}" class="btn btn-sm btn-outline-secondary float-end">
+                          <i class="fas fa-eye"></i> View
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                {% endfor %}
+              {% else %}
+                <div class="col-12 text-center py-4 text-muted">
+                  <i class="fas fa-users fa-2x mb-3"></i>
+                  <p>No contacts added to this list yet</p>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Sublists Grid -->
+        <h4 class="mb-3">Included Lists</h4>
+        <div class="card mb-4">
+          <div class="card-header bg-light d-flex justify-content-between align-items-center">
+            <span>Sublists</span>
+            <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addSublistModal">
+              <i class="fas fa-plus"></i> Add List
+            </button>
+          </div>
+          <div class="card-body">
+            <div class="row sublists-grid" id="sublistsGrid">
+              {% if object and object.sublists.all %}
+                {% for sublist in object.sublists.all %}
+                  <div class="col-md-4 mb-3 sublist-item" data-sublist-id="{{ sublist.id }}">
+                    <div class="card h-100">
+                      <div class="card-body">
+                        <h5 class="card-title">{{ sublist.name }}</h5>
+                        <p class="card-text">{{ sublist.description|truncatechars:100 }}</p>
+                        <p class="text-muted">
+                          <i class="fas fa-users me-1"></i> {{ sublist.contacts.count }} contacts
+                        </p>
+                      </div>
+                      <div class="card-footer bg-white">
+                        <button type="button" class="btn btn-sm btn-outline-danger remove-sublist" data-sublist-id="{{ sublist.id }}">
+                          <i class="fas fa-times"></i> Remove
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                {% endfor %}
+              {% else %}
+                <div class="col-12 text-center py-4 text-muted">
+                  <i class="fas fa-list fa-2x mb-3"></i>
+                  <p>No sublists added yet</p>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-3">
+          <button type="submit" class="btn btn-primary">
+            {% if object %}Save Changes{% else %}Create List{% endif %}
+          </button>
+          <a href="{% url 'contacts:contactlist_list' %}" class="btn btn-secondary">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Add Contact Modal -->
+<div class="modal fade" id="addContactModal" tabindex="-1" aria-labelledby="addContactModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addContactModalLabel">Add Contact to List</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <input type="text" class="form-control" id="contactSearchInput" placeholder="Search contacts...">
+        </div>
+        <div id="contactSearchResults" class="list-group">
+          <!-- Search results will be displayed here -->
+          <div class="text-center py-3 text-muted">
+            <p>Type to search for contacts</p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Sublist Modal -->
+<div class="modal fade" id="addSublistModal" tabindex="-1" aria-labelledby="addSublistModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addSublistModalLabel">Add List as Sublist</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <input type="text" class="form-control" id="sublistSearchInput" placeholder="Search lists...">
+        </div>
+        <div id="sublistSearchResults" class="list-group">
+          <!-- Search results will be displayed here -->
+          <div class="text-center py-3 text-muted">
+            <p>Type to search for lists</p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Contact search functionality
+    const contactSearchInput = document.getElementById('contactSearchInput');
+    const contactSearchResults = document.getElementById('contactSearchResults');
+    const contactsGrid = document.getElementById('contactsGrid');
+    const hiddenContactsField = document.querySelector('select[name="contacts"]');
+
+    // Track currently selected contacts
+    const selectedContacts = new Set();
+
+    // Initialize selected contacts from form data
+    Array.from(hiddenContactsField.selectedOptions).forEach(option => {
+      selectedContacts.add(option.value);
+    });
+
+    // Contact search with debounce
+    let contactSearchTimeout;
+    contactSearchInput.addEventListener('input', function() {
+      clearTimeout(contactSearchTimeout);
+      contactSearchTimeout = setTimeout(() => {
+        const query = contactSearchInput.value.trim();
+        if (query.length < 2) {
+          contactSearchResults.innerHTML = '<div class="text-center py-3 text-muted"><p>Type at least 2 characters to search</p></div>';
+          return;
+        }
+
+
+        //fetch(`{% url 'contacts:list_search' %}?q=${query}&exclude_for={% if object %}{{ object.id }}{% else %}0{% endif %}`)
+        fetch(`{% url 'contacts:contact_search' %}?q=${encodeURIComponent(query)}&exclude_for={{ object.id|default:0 }}`)
+
+          .then(response => response.json())
+          .then(data => {
+            contactSearchResults.innerHTML = '';
+            if (data.results.length === 0) {
+              contactSearchResults.innerHTML = '<div class="list-group-item text-muted">No contacts found.</div>';
+              return;
+            }
+
+            data.results.forEach(contact => {
+              // Skip if already selected
+              if (selectedContacts.has(contact.id.toString())) return;
+
+              const item = document.createElement('div');
+              item.className = 'list-group-item list-group-item-action';
+              item.innerHTML = `
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <strong>${contact.first_name} ${contact.last_name}</strong>
+                    ${contact.organization ? `<br><small>${contact.organization}</small>` : ''}
+                  <button type="button" class="btn btn-sm btn-primary add-contact-btn" data-contact-id="${contact.id}" 
+                          data-contact-name="${contact.first_name} ${contact.last_name}">
+                    <i class="fas fa-plus"></i> Add
+                  </button>
+                </div>
+              `;
+
+              item.querySelector('.add-contact-btn').addEventListener('click', function() {
+                const contactId = this.dataset.contactId;
+                const contactName = this.dataset.contactName;
+                addContactToList(contactId, contactName);
+              });
+
+              contactSearchResults.appendChild(item);
+            });
+          });
+      }, 300);
+    });
+
+    // Add contact to list
+    function addContactToList(contactId, contactName) {
+      // Update hidden field
+      const option = document.createElement('option');
+      option.value = contactId;
+      option.selected = true;
+      hiddenContactsField.appendChild(option);
+      selectedContacts.add(contactId);
+
+      // Add to grid
+      debugger;
+      fetch(`/contacts/${contactId}/`)
+        .then(response => response.json())
+        .then(contact => {
+          const emptyMessage = contactsGrid.querySelector('.text-center');
+          if (emptyMessage) emptyMessage.remove();
+
+          const contactCard = document.createElement('div');
+          contactCard.className = 'col-md-4 mb-3 contact-item';
+          contactCard.dataset.contactId = contactId;
+          contactCard.innerHTML = `
+            <div class="card h-100">
+              <div class="card-body">
+                <h5 class="card-title">${contact.first_name} ${contact.last_name}</h5>
+                ${contact.job_title ? `<p class="card-text text-muted mb-1">${contact.job_title}</p>` : ''}
+                ${contact.organization ? `<p class="card-text text-muted mb-1">${contact.organization}</p>` : ''}
+                ${contact.email ? `<p class="card-text mb-1"><i class="fas fa-envelope me-2"></i>${contact.email}</p>` : ''}
+                ${contact.phone_number ? `<p class="card-text"><i class="fas fa-phone me-2"></i>${contact.phone_number}</p>` : ''}
+              </div>
+              <div class="card-footer bg-white">
+                <button type="button" class="btn btn-sm btn-outline-danger remove-contact" data-contact-id="${contactId}">
+                  <i class="fas fa-times"></i> Remove
+                </button>
+                <a href="/contacts/${contactId}/" class="btn btn-sm btn-outline-secondary float-end">
+                  <i class="fas fa-eye"></i> View
+                </a>
+              </div>
+            </div>
+          `;
+
+          contactCard.querySelector('.remove-contact').addEventListener('click', function() {
+            removeContactFromList(contactId);
+          });
+
+          contactsGrid.appendChild(contactCard);
+
+          // Close modal and clear search
+          const modal = bootstrap.Modal.getInstance(document.getElementById('addContactModal'));
+          modal.hide();
+          contactSearchInput.value = '';
+          contactSearchResults.innerHTML = '<div class="text-center py-3 text-muted"><p>Type to search for contacts</p></div>';
+        });
+    }
+
+    // Remove contact from list
+    function removeContactFromList(contactId) {
+      // Update hidden field
+      const option = Array.from(hiddenContactsField.options).find(opt => opt.value === contactId);
+      if (option) {
+        option.selected = false;
+        selectedContacts.delete(contactId);
+      }
+
+      // Remove from grid
+      const contactCard = contactsGrid.querySelector(`.contact-item[data-contact-id="${contactId}"]`);
+      if (contactCard) contactCard.remove();
+
+      // Show empty message if needed
+      if (contactsGrid.querySelectorAll('.contact-item').length === 0) {
+        contactsGrid.innerHTML = `
+          <div class="col-12 text-center py-4 text-muted">
+            <i class="fas fa-users fa-2x mb-3"></i>
+            <p>No contacts added to this list yet</p>
+          </div>
+        `;
+      }
+    }
+
+    // Set up remove buttons for existing contacts
+    document.querySelectorAll('.remove-contact').forEach(button => {
+      button.addEventListener('click', function() {
+        removeContactFromList(this.dataset.contactId);
+      });
+    });
+
+    // Sublist search functionality
+    const sublistSearchInput = document.getElementById('sublistSearchInput');
+    const sublistSearchResults = document.getElementById('sublistSearchResults');
+    const sublistsGrid = document.getElementById('sublistsGrid');
+    const hiddenSublistsField = document.querySelector('select[name="sublists"]');
+
+    // Track currently selected sublists
+    const selectedSublists = new Set();
+
+    // Initialize selected sublists from form data
+    Array.from(hiddenSublistsField.selectedOptions).forEach(option => {
+      selectedSublists.add(option.value);
+    });
+
+    // Sublist search with debounce
+    let sublistSearchTimeout;
+    sublistSearchInput.addEventListener('input', function() {
+      clearTimeout(sublistSearchTimeout);
+      sublistSearchTimeout = setTimeout(() => {
+        const query = sublistSearchInput.value.trim();
+        if (query.length < 2) {
+          sublistSearchResults.innerHTML = '<div class="text-center py-3 text-muted"><p>Type at least 2 characters to search</p></div>';
+          return;
+        }
+
+        // Exclude this list and already included sublists
+        fetch(`{% url 'contacts:list_search' %}?q=${query}`)
+          .then(response => response.json())
+          .then(data => {
+            sublistSearchResults.innerHTML = '';
+            if (data.results.length === 0) {
+              sublistSearchResults.innerHTML = '<div class="list-group-item text-muted">No lists found.</div>';
+              return;
+            }
+
+            data.results.forEach(list => {
+              // Skip if current list or already selected
+              if (({% if object %}list.id === {{ object.id }}{% else %}false{% endif %}) || 
+                  selectedSublists.has(list.id.toString())) return;
+
+              const item = document.createElement('div');
+              item.className = 'list-group-item list-group-item-action';
+              item.innerHTML = `
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <strong>${list.name}</strong>
+                  </div>
+                  <button type="button" class="btn btn-sm btn-primary add-sublist-btn" 
+                          data-sublist-id="${list.id}" data-sublist-name="${list.name}">
+                    <i class="fas fa-plus"></i> Add
+                  </button>
+                </div>
+              `;
+
+              item.querySelector('.add-sublist-btn').addEventListener('click', function() {
+                const sublistId = this.dataset.sublistId;
+                const sublistName = this.dataset.sublistName;
+                addSublistToList(sublistId, sublistName);
+              });
+
+              sublistSearchResults.appendChild(item);
+            });
+          });
+      }, 300);
+    });
+
+    // Add sublist to list
+    function addSublistToList(sublistId, sublistName) {
+      // Update hidden field
+      const option = document.createElement('option');
+      option.value = sublistId;
+      option.selected = true;
+      hiddenSublistsField.appendChild(option);
+      selectedSublists.add(sublistId);
+
+      // Add to grid
+      fetch(`/contacts/lists/${sublistId}/`)
+        .then(response => response.json())
+        .then(sublist => {
+          const emptyMessage = sublistsGrid.querySelector('.text-center');
+          if (emptyMessage) emptyMessage.remove();
+
+          const sublistCard = document.createElement('div');
+          sublistCard.className = 'col-md-4 mb-3 sublist-item';
+          sublistCard.dataset.sublistId = sublistId;
+          sublistCard.innerHTML = `
+            <div class="card h-100">
+              <div class="card-body">
+                <h5 class="card-title">${sublist.name}</h5>
+                <p class="card-text">${sublist.description || ''}</p>
+                <p class="text-muted">
+                  <i class="fas fa-users me-1"></i> ${sublist.contact_count} contacts
+                </p>
+              </div>
+              <div class="card-footer bg-white">
+                <button type="button" class="btn btn-sm btn-outline-danger remove-sublist" data-sublist-id="${sublistId}">
+                  <i class="fas fa-times"></i> Remove
+                </button>
+              </div>
+            </div>
+          `;
+
+          sublistCard.querySelector('.remove-sublist').addEventListener('click', function() {
+            removeSublistFromList(sublistId);
+          });
+
+          sublistsGrid.appendChild(sublistCard);
+
+          // Close modal and clear search
+          const modal = bootstrap.Modal.getInstance(document.getElementById('addSublistModal'));
+          modal.hide();
+          sublistSearchInput.value = '';
+          sublistSearchResults.innerHTML = '<div class="text-center py-3 text-muted"><p>Type to search for lists</p></div>';
+        });
+    }
+
+    // Remove sublist from list
+    function removeSublistFromList(sublistId) {
+      // Update hidden field
+      const option = Array.from(hiddenSublistsField.options).find(opt => opt.value === sublistId);
+      if (option) {
+        option.selected = false;
+        selectedSublists.delete(sublistId);
+      }
+
+      // Remove from grid
+      const sublistCard = sublistsGrid.querySelector(`.sublist-item[data-sublist-id="${sublistId}"]`);
+      if (sublistCard) sublistCard.remove();
+
+      // Show empty message if needed
+      if (sublistsGrid.querySelectorAll('.sublist-item').length === 0) {
+        sublistsGrid.innerHTML = `
+          <div class="col-12 text-center py-4 text-muted">
+            <i class="fas fa-list fa-2x mb-3"></i>
+            <p>No sublists added yet</p>
+          </div>
+        `;
+      }
+    }
+
+    // Set up remove buttons for existing sublists
+    document.querySelectorAll('.remove-sublist').forEach(button => {
+      button.addEventListener('click', function() {
+        removeSublistFromList(this.dataset.sublistId);
+      });
+    });
+  });
+</script>
+{% endblock %}

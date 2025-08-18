@@ -108,7 +108,7 @@ document.addEventListener("DOMContentLoaded", function() {
                         {% for contact_list in object.contact_lists.all %}
                             {{ contact_list.id }},
                         {% endfor %}
-                    ];
+                    ]
                     (data.results || []).forEach(list => {
                         if (alreadyMemberIds.includes(list.id)) return;
                         let item = document.createElement("div");

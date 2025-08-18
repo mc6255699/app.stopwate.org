@@ -11,23 +11,27 @@ urlpatterns = [
     path("<int:pk>/", ContactDetailView.as_view(), name="detail"),  # 
     path("<int:pk>/edit/", ContactUpdateView.as_view(), name="update"),
     path("<int:pk>/delete/", ContactDeleteView.as_view(), name="delete"),
+    path('<int:pk>/lists/add/', views.add_contact_to_list, name='contact_list_add'),
+    path('<int:pk>/lists/remove/', views.remove_contact_from_list, name='contact_list_remove'),
 
-    # Contact List Records 
     path("lists/", ContactListListView.as_view(), name="contactlist_list"),
     path("lists/new/", ContactListCreateView.as_view(), name="contactlist_create"),
-    path("lists/<int:pk>/edit/", ContactListUpdateView.as_view(), name="contactlist_update"),
-
+    path("lists/<int:pk>/edit/", ContactListUpdateView.as_view(), name="contactlist_edit"),
 
     path('lists/search/', views.search_contact_lists, name='list_search'),
-    path('<int:pk>/lists/add/', views.add_contact_to_list, name='contact_list_add'),
-    path('contacts/<int:pk>/lists/add/', views.add_contact_to_list, name='contact_list_add'),
-    path('contacts/<int:contact_id>/lists/add/', views.add_contact_to_list, name='contact_list_add_alt'),
-    path('<int:pk>/lists/remove/', views.remove_contact_from_list, name='contact_list_remove'),
+    path('lists/<int:pk>/remove/<int:contact_id>', views.contactlist_remove_contact, name="contactlist_remove_contact",),
     path('lists/<int:list_id>/add_sublist/', views.add_sublist_to_list, name='add_sublist_to_list'),
     path('lists/<int:list_id>/remove_sublist/', views.remove_sublist_from_list, name='remove_sublist_from_list'),
 
     # ajax functions
-    path('contacts/search/', views.search_contact_by_name, name='contact_search'),
+    # path('contacts/search/', views.search_contact_by_name, name='contact_search'),
+    # path('contacts/<int:pk>/lists/add/', views.add_contact_to_list, name='contact_list_add'),
+    # path('contacts/<int:contact_id>/lists/add/', views.add_contact_to_list, name='contact_list_add_alt'),
+
+    path('search/', views.search_contact_by_name, name='contact_search'),
+    path('<int:pk>/lists/add/', views.add_contact_to_list, name='contact_list_add'),
+    path('<int:contact_id>/lists/add/', views.add_contact_to_list, name='contact_list_add_alt'),
+    path("<int:pk>/api/", views.contact_detail_api, name="contact_detail_api"),
 
 ]
 

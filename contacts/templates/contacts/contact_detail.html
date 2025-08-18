@@ -99,7 +99,7 @@
     add: "{% url 'contacts:contact_list_add' contact.id %}",
     remove: "{% url 'contacts:contact_list_remove' contact.id %}",
   };
-  const contactId = {{ contact.id }};
+  const contactId = {{ contact.id }}
 
   // CSRF helper
   function getCookie(name) {
