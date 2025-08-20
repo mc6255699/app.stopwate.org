@@ -1,37 +1,22 @@
-{% extends "core/base_root.html" %} {% block navbar_class %}bg-success{% endblock %} 
-
+{% extends "core/base_root.html" %}
+{% block navbar_class %}bg-success{% endblock %}
 
 {% block app_nav %}
 <ul class="navbar-nav mx-auto d-flex align-items-center">
-  <!-- Icon + Title -->
-  <li class="nav-item d-flex align-items-center me-3">
+  <!-- Contacts -->
+  <li class="nav-item d-flex align-items-center me-5">  <!-- Increased spacing -->
     <i class="fas fa-address-book fa-lg text-white me-2"></i>
-    <span class="navbar-text text-white fw-bold">Contacts</span>
+    <a href="{% url 'contacts:list' %}" class="text-white text-decoration-none fw-bold {% if request.path == '/contacts/' %}text-warning{% endif %}">
+      Contacts
+    </a>
   </li>
 
-  <!-- Menu Links -->
-  <li class="nav-item">
-    <a class="nav-link text-white" href="{% url 'contacts:list' %}">All Contacts</a>
+  <!-- Lists -->
+  <li class="nav-item d-flex align-items-center">
+    <i class="fas fa-users fa-lg text-white me-2"></i>
+    <a class="nav-link text-white text-decoration-none fw-bold {% if request.path == '/contacts/contactlists/' %}text-warning{% endif %}" href="{% url 'contacts:contactlist_list' %}">
+      Lists
+    </a>
   </li>
-    <li class="nav-item">
-    <a class="nav-link text-white" href="{% url 'contacts:add' %}"
-      >Add Contact</a
-    >
-  </li>
-
-
-    <li class="nav-item">
-    <a class="nav-link text-white" href="{% url 'contacts:contactlist_list' %}"
-      >Contact Lists </a
-    >
-  </li>
-      <li class="nav-item">
-    <a class="nav-link text-white" href="{% url 'contacts:contactlist_create' %}"
-      >Contact Lists (Add)</a
-    >
-  </li>
-
 </ul>
 {% endblock %}
-
-

@@ -1,0 +1,31 @@
+{% extends "contacts/base_contacts.html" %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container mt-4">
+  <h1>{% if form.instance.pk %}Edit Contact{% else %}Add New Contact{% endif %}</h1>
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {% crispy form %}
+  </form>
+</div>
+
+<script>
+// Bootstrap 5 client-side validation helper
+(() => {
+  'use strict'
+
+  const forms = document.querySelectorAll('form')
+
+  Array.from(forms).forEach(form => {
+    form.addEventListener('submit', event => {
+      if (!form.checkValidity()) {
+        event.preventDefault()
+        event.stopPropagation()
+      }
+      form.classList.add('was-validated')
+    }, false)
+  })
+})()
+</script>
+{% endblock %}

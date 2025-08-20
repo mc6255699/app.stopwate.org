@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 
 
 class Organization(models.Model):
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, unique=True )
     address = models.CharField(max_length=255, blank=True)
     city = models.CharField(max_length=100, blank=True)
     state = models.CharField(max_length=50, blank=True)
@@ -38,7 +38,8 @@ class Contact(models.Model):
         on_delete=models.SET_NULL,  # keep record if organization deleted
         null=True,
         blank=True,
-        related_name='contacts'
+        related_name='contacts',
+        db_index=True,
     )
     owner = models.ForeignKey(
         User,
@@ -73,3 +74,4 @@ class ContactList(models.Model):
 
     def __str__(self):
         return self.name
+

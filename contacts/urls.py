@@ -1,38 +1,40 @@
 from django.urls import path
 from . import views
-from .views import *
 
 app_name = 'contacts'
 
 urlpatterns = [
+    # ---------------------------
     # Contact Records
-    path('', ContactListView.as_view(), name='list'),  # list all contacts
-    path('add/', ContactCreateView.as_view(), name='add'),  # the create form
-    path("<int:pk>/", ContactDetailView.as_view(), name="detail"),  # 
-    path("<int:pk>/edit/", ContactUpdateView.as_view(), name="update"),
-    path("<int:pk>/delete/", ContactDeleteView.as_view(), name="delete"),
+    # ---------------------------
+    path('', views.ContactListView.as_view(), name='list'),             # List all contacts
+    path('add/', views.ContactCreateView.as_view(), name='add'),                        # Simple Contact Add FOrm 
+    path('<int:pk>/', views.contact_detail, name='detail'),             # Unified detail view
+    path('<int:pk>/edit/', views.contact_edit, name='update'),          # Unified edit form
+    path('<int:pk>/delete/', views.ContactDeleteView.as_view(), name='delete'),
+
+    # ---------------------------
+    # Contact list membership AJAX
+    # ---------------------------
     path('<int:pk>/lists/add/', views.add_contact_to_list, name='contact_list_add'),
     path('<int:pk>/lists/remove/', views.remove_contact_from_list, name='contact_list_remove'),
+    path('search_ajax/', views.contact_search_ajax, name='contact_search_ajax'),
+    path('contactlist_add_contact/<int:list_id>/<int:contact_id>/', 
+         views.contactlist_add_contact, name='contactlist_add_contact'),
 
-    path("lists/", ContactListListView.as_view(), name="contactlist_list"),
-    path("lists/new/", ContactListCreateView.as_view(), name="contactlist_create"),
-    path("lists/<int:pk>/edit/", ContactListUpdateView.as_view(), name="contactlist_edit"),
-
-    path('lists/search/', views.search_contact_lists, name='list_search'),
-    path('lists/<int:pk>/remove/<int:contact_id>', views.contactlist_remove_contact, name="contactlist_remove_contact",),
+    # ---------------------------
+    # Contact Lists (Lists of Contacts)
+    # ---------------------------
+    path('lists/', views.ContactListListView.as_view(), name='contactlist_list'),           # List all contact lists
+    path('lists/new/', views.ContactListCreateView.as_view(), name='contactlist_create'),   # Create new contact list
+    path('lists/<int:pk>/edit/', views.ContactListUpdateView.as_view(), name='contactlist_edit'),  # Edit list
+    path('lists/search/', views.search_contact_lists, name='list_search'),                  # AJAX search
+    path('lists/<int:pk>/remove/<int:contact_id>/', views.contactlist_remove_contact, name='contactlist_remove_contact'),
     path('lists/<int:list_id>/add_sublist/', views.add_sublist_to_list, name='add_sublist_to_list'),
     path('lists/<int:list_id>/remove_sublist/', views.remove_sublist_from_list, name='remove_sublist_from_list'),
 
-    # ajax functions
-    # path('contacts/search/', views.search_contact_by_name, name='contact_search'),
-    # path('contacts/<int:pk>/lists/add/', views.add_contact_to_list, name='contact_list_add'),
-    # path('contacts/<int:contact_id>/lists/add/', views.add_contact_to_list, name='contact_list_add_alt'),
-
-    path('search/', views.search_contact_by_name, name='contact_search'),
-    path('<int:pk>/lists/add/', views.add_contact_to_list, name='contact_list_add'),
-    path('<int:contact_id>/lists/add/', views.add_contact_to_list, name='contact_list_add_alt'),
-    path("<int:pk>/api/", views.contact_detail_api, name="contact_detail_api"),
-
+    # ---------------------------
+    # API endpoint
+    # ---------------------------
+    path('<int:pk>/api/', views.contact_detail_api, name='contact_detail_api'),
 ]
-
-

@@ -2,30 +2,75 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
-<div class="container mt-4">
-  <h1>{% if form.instance.pk %}Edit Contact{% else %}Add New Contact{% endif %}</h1>
-  <form method="post" novalidate>
-    {% csrf_token %}
-    {% crispy form %}
-  </form>
+<div class="container py-4">
+
+  <div class="d-flex align-items-center mb-3">
+    <i class="fas fa-address-card me-2"></i>
+    <h1 class="h3 mb-0">
+      {% if object %}Edit Contact{% else %}Add a Contact{% endif %}
+    </h1>
+  </div>
+
+  <!-- Tabs -->
+  <ul class="nav nav-tabs" id="contactTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button class="nav-link active" id="tab-form-tab" data-bs-toggle="tab"
+              data-bs-target="#tab-form" type="button" role="tab"
+              aria-controls="tab-form" aria-selected="true">
+        Details
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link {% if not object %}disabled{% endif %}" id="tab-lists-tab" data-bs-toggle="tab"
+              data-bs-target="#tab-lists" type="button" role="tab"
+              aria-controls="tab-lists" aria-selected="false">
+        Lists
+      </button>
+    </li>
+  </ul>
+
+  <!-- Card + Tab panes -->
+  <div class="card shadow-sm border-0 bg-light" style="border-radius: 1rem;">
+    <div class="card-body tab-content">
+
+      <!-- Tab 1: Form -->
+      <div class="tab-pane fade show active" id="tab-form" role="tabpanel" aria-labelledby="tab-form-tab">
+        {% crispy form %}
+      </div>
+
+      <!-- Tab 2: Lists -->
+      <div class="tab-pane fade" id="tab-lists" role="tabpanel" aria-labelledby="tab-lists-tab">
+        {% if object %}
+          {% if object.contact_lists.exists %}
+            <div class="table-responsive">
+              <table class="table table-sm table-bordered table-striped mb-0">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Active</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for lst in object.contact_lists.all %}
+                  <tr>
+                    <td>{{ lst.name }}</td>
+                    <td class="text-muted">{{ lst.description|default:"—" }}</td>
+                    <td>{{ lst.active|yesno:"Yes,No" }}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% else %}
+            <div class="text-muted">This contact isn’t on any lists yet.</div>
+          {% endif %}
+        {% else %}
+          <div class="text-muted">Save the contact first to view list memberships.</div>
+        {% endif %}
+      </div>
+
+    </div>
+  </div>
 </div>
-
-<script>
-// Bootstrap 5 client-side validation helper
-(() => {
-  'use strict'
-
-  const forms = document.querySelectorAll('form')
-
-  Array.from(forms).forEach(form => {
-    form.addEventListener('submit', event => {
-      if (!form.checkValidity()) {
-        event.preventDefault()
-        event.stopPropagation()
-      }
-      form.classList.add('was-validated')
-    }, false)
-  })
-})()
-</script>
 {% endblock %}

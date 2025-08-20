@@ -47,47 +47,44 @@ class ContactListView(ListView):
         ctx = super().get_context_data(**kwargs)
         ctx["filter_form"] = ContactFilterForm(self.request.GET)
         return ctx
-
 class ContactDetailView(DetailView):
     model = Contact
-    template_name = 'contacts/contact_detail.html'
-    context_object_name = 'contact'
+    template_name = "contacts/contact_form.html"
 
     def get_context_data(self, **kwargs):
-        ctx = super().get_context_data(**kwargs)
-        # contact.contact_lists is your related_name from ContactList.contacts
-        ctx["member_lists"] = self.object.contact_lists.all().order_by("name")
-        return ctx
+        context = super().get_context_data(**kwargs)
+        context['page_type'] = 'detail'
+        context['form'] = ContactForm(instance=self.object)
+        return context
 
+#Using ths class as a function for creating a basic contact - It is straightforward and just uses the default crispyform. 
 class ContactCreateView(CreateView):
     model = Contact
     form_class = ContactForm
-    template_name = 'contacts/contact_add.html'  # your crispy form template
-    success_url = reverse_lazy('contacts:list')
-
-    def form_valid(self, form):
-        # Automatically assign owner as logged-in user if not set
-        if not form.instance.owner:
-            form.instance.owner = self.request.user
-        return super().form_valid(form)
-    
-class ContactUpdateView(LoginRequiredMixin, UpdateView):
-    model = Contact
-    form_class = ContactForm
-    template_name = "contacts/contact_edit.html"  # adjust if yours differs
-    context_object_name = "contact"  # optional, just for clarity
+    template_name = "contacts/contact_add.html"
+ 
+    def get_success_url(self):
+        messages.success(self.request, "Contact created.")
+        return reverse_lazy("contacts:list")
 
     def get_context_data(self, **kwargs):
-        ctx = super().get_context_data(**kwargs)
-        # Your related_name is "contact_lists" on Contact
-        ctx["member_lists"] = self.object.contact_lists.all().order_by("name")
-        return ctx
+        context = super().get_context_data(**kwargs)
+        context['page_type'] = 'create'
+        return context
+    
+class ContactUpdateView(UpdateView):
+    model = Contact
+    form_class = ContactForm
+    template_name = "contacts/contact_form.html"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['page_type'] = 'edit'
+        return context
 class ContactDeleteView(DeleteView):
     model = Contact
     template_name = 'contacts/contact_confirm_delete.html'  # create this template
     success_url = reverse_lazy('contacts:list')
-
 class ContactListListView(LoginRequiredMixin, ListView):
     model = ContactList
     template_name = "contacts/contactlist_list.html"
@@ -143,6 +140,9 @@ class ContactListUpdateView(LoginRequiredMixin, UpdateView):
 
 
     #-----------------------AJAX VIEWS-----------------------
+
+
+
 
 @login_required
 @require_GET
@@ -226,7 +226,11 @@ def remove_contact_from_list(request, pk):
 
     cl = get_object_or_404(ContactList, pk=list_id)
     cl.contacts.remove(contact)
-    return JsonResponse({"ok": True})
+    messages.success(request, f"removed from list : {cl.name}")
+    return redirect('contacts:update', pk=contact.pk)
+#    return JsonResponse({"ok": True})
+
+
 
 @login_required
 def add_sublist_to_list(request, pk):
@@ -266,7 +270,6 @@ def contact_detail_api(request, pk):
         "phone_number": c.phone_number or "",
     })
 
-
 @require_POST
 @login_required
 def contactlist_remove_contact(request, pk, contact_id):
@@ -275,3 +278,90 @@ def contactlist_remove_contact(request, pk, contact_id):
     cl.contacts.remove(contact)
     messages.success(request, f"Removed {contact.first_name} {contact.last_name} from “{cl.name}”.")
     return redirect("contacts:contactlist_edit", pk=pk)
+
+@login_required
+def contact_search_ajax(request):
+    """
+    Return JSON list of contacts matching a search query.
+    Excludes contacts already in the list if `list_id` is provided.
+    """
+    query = request.GET.get("q", "").strip()
+    list_id = request.GET.get("list_id")
+
+    if not query:
+        return JsonResponse([], safe=False)
+
+    qs = Contact.objects.filter(
+        Q(first_name__icontains=query) | Q(last_name__icontains=query) | Q(email__icontains=query)
+    )
+
+    # Exclude contacts already in list
+    if list_id:
+        try:
+            clist = ContactList.objects.get(pk=list_id)
+            qs = qs.exclude(pk__in=clist.contacts.values_list("pk", flat=True))
+        except ContactList.DoesNotExist:
+            pass
+
+    results = [
+        {"id": c.id, "first_name": c.first_name, "last_name": c.last_name, "email": c.email or ""}
+        for c in qs[:20]  # limit results to 20
+    ]
+
+    return JsonResponse(results, safe=False)
+
+@login_required
+@require_POST
+def contactlist_add_contact(request, list_id, contact_id):
+    contact_list = get_object_or_404(ContactList, pk=list_id)
+    contact = get_object_or_404(Contact, pk=contact_id)
+
+    if contact not in contact_list.contacts.all():
+        contact_list.contacts.add(contact)
+        messages.success(request, f"{contact.first_name} {contact.last_name} added to the list.")
+    else:
+        messages.info(request, f"{contact.first_name} {contact.last_name} is already in the list.")
+
+    return redirect("contacts:contactlist_edit", pk=list_id)
+
+#round 2 of ajax add functions. 
+
+def contact_add(request):
+    if request.method == "POST":
+        form = ContactForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect("contacts:list")
+    else:
+        form = ContactForm()
+    return render(request, "contacts/contact_form.html", {"form": form, "mode": "add"})
+
+def contact_edit(request, pk):
+    contact = get_object_or_404(Contact, pk=pk)
+    if request.method == "POST":
+        form = ContactForm(request.POST, instance=contact)
+        if form.is_valid():
+            form.save()
+            return redirect("contacts:detail", pk=contact.pk)
+    else:
+        form = ContactForm(instance=contact)
+    return render(request, "contacts/contact_form.html", {"form": form, "object": contact, "mode": "edit"})
+
+def contact_detail(request, pk):
+    contact = get_object_or_404(Contact, pk=pk)
+    return render(request, "contacts/contact_form.html", {"object": contact, "mode": "detail"})
+
+def search_contact_lists(request):
+    query = request.GET.get("q", "").strip()
+    results = []
+    if query:
+        lists = ContactList.objects.filter(name__icontains=query).order_by("name")[:10]
+        results = [{"id": cl.id, "name": cl.name} for cl in lists]
+    return JsonResponse({"results": results})
+
+@require_POST
+def contactlist_add_contact(request, list_id, contact_id):
+    contact_list = get_object_or_404(ContactList, pk=list_id)
+    contact = get_object_or_404(Contact, pk=contact_id)
+    contact_list.contacts.add(contact)
+    return JsonResponse({"status": "success", "list_id": list_id, "contact_id": contact_id})
