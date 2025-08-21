@@ -1,5 +1,6 @@
 from django import forms
 from .models import CCRequest, CCName
+from django.core.validators import MaxValueValidator
 
 from django import forms
 
@@ -17,6 +18,13 @@ CC_CHOICES_TUPLES = [(v, k) for k, v in CC_CHOICES.items()]
 
 
 class CCRequestForm(forms.ModelForm):
+    def clean_amount(self):
+        amount = self.cleaned_data.get("amount")
+        if amount is not None and amount > 5000:
+            raise forms.ValidationError("The maximum allowed amount is $5000.")
+        return amount
+
+
     credit_card_name = forms.ModelChoiceField(
         queryset=CCName.objects.filter(active=True),
         widget=forms.Select(attrs={'class': 'form-select'}),
@@ -25,7 +33,7 @@ class CCRequestForm(forms.ModelForm):
 
     class Meta:
         model = CCRequest
-        fields = ['description', 'vendor', 'amount', 'credit_card_name', 'it_approval']
+        fields = ['description', 'vendor', 'amount', 'credit_card_name']
         widgets = {
             'description': forms.Textarea(attrs={
                 'class': 'form-control',
@@ -38,7 +46,9 @@ class CCRequestForm(forms.ModelForm):
             }),
             'amount': forms.NumberInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'e.g., 123.45'
+                'placeholder': 'e.g., 123.45',
+                'max': 5000,
+
             }),
             # 'payment_code': forms.TextInput(attrs={
             #     'class': 'form-control',
@@ -48,9 +58,14 @@ class CCRequestForm(forms.ModelForm):
         labels = {
             'payment_code': 'Allocation Code (optional)',
             'vendor': 'Merchant Name',
-            'it_approval': '   Yes I have written IT approval'
+#            'it_approval': '   Yes I have written IT approval'
          }
         help_texts = {
-            'it_approval': '💡 IT approval is required for all software/equipment purchases. If you do not have written approval, please contact Mike before any purchase.'
+            'amount': '💡 IT approval is required for all software/equipment purchases. If you do not have written approval, please contact Mike before any purchase.'
         }
+
+
+
+
+
           

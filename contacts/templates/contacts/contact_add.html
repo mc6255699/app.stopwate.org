@@ -21,7 +21,8 @@
       </button>
     </li>
     <li class="nav-item" role="presentation">
-      <button class="nav-link {% if not object %}disabled{% endif %}" id="tab-lists-tab" data-bs-toggle="tab"
+      <!-- No 'disabled' class -->
+      <button class="nav-link" id="tab-lists-tab" data-bs-toggle="tab"
               data-bs-target="#tab-lists" type="button" role="tab"
               aria-controls="tab-lists" aria-selected="false">
         Lists
@@ -40,7 +41,11 @@
 
       <!-- Tab 2: Lists -->
       <div class="tab-pane fade" id="tab-lists" role="tabpanel" aria-labelledby="tab-lists-tab">
-        {% if object %}
+        {% if not object %}
+          <div class="alert alert-warning my-3">
+            Please save this contact record to enable lists tab.
+          </div>
+        {% else %}
           {% if object.contact_lists.exists %}
             <div class="table-responsive">
               <table class="table table-sm table-bordered table-striped mb-0">
@@ -65,8 +70,6 @@
           {% else %}
             <div class="text-muted">This contact isn’t on any lists yet.</div>
           {% endif %}
-        {% else %}
-          <div class="text-muted">Save the contact first to view list memberships.</div>
         {% endif %}
       </div>
 
